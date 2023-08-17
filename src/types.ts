@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 
 export interface IStore {
     commands: TCommand[];
+    globalStorageFilePath: string;
 }
 
 export type TCommand = (ICommand | ICommandWithSequence);

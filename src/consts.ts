@@ -1,4 +1,4 @@
-export const PLUGIN_NAME = 'favoritesPanel';
+export const PLUGIN_NAME = 'pings';
 
 export const ERRORS = {
     FILE_NOT_FOUND: 'File not found',

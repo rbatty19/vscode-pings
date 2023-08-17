@@ -1,9 +1,9 @@
 {
-    "name": "favorites-panel",
-    "displayName": "Favorites panel",
+    "name": "pings",
+    "displayName": "Pings",
     "description": "Use the extension to create a panel with your favorite commands, folders, files, URLs.",
-    "version": "1.4.1",
-    "publisher": "sabitovvt",
+    "version": "1.0.0",
+    "publisher": "rbatty19",
     "engines": {
         "vscode": "^1.53.0"
     },
@@ -14,128 +14,21 @@
         "bookmarks",
         "favorites",
         "groups",
+        "pings",
+        "remember",
+        "pin",
+        "pinned",
+        "folders",
+        "files",
+        "tools",
         "favorite files"
     ],
-    "icon": "resources/favorites-panel.png",
-    "homepage": "https://github.com/sabitovvt/vscode-favorites-panel",
+    "activationEvents": [],
+    "icon": "resources/pings.png",
+    "homepage": "https://github.com/rbatty19/vscode-pings",
     "repository": {
         "type": "git",
-        "url": "https://github.com/sabitovvt/vscode-favorites-panel.git"
-    },
-    "activationEvents": [
-        "onView:favoritesPanel",
-        "onView:favoritesPanelExplorer"
-    ],
-    "main": "./out/extension.js",
-    "contributes": {
-        "configuration": {
-            "type": "object",
-            "title": "favoritesPanel",
-            "properties": {
-                "favoritesPanel.configPath": {
-                    "type": "string",
-                    "default": null,
-                    "description": "Path to your file with settings for \"Favorites Panel\""
-                },
-                "favoritesPanel.configPathForWorkspace": {
-                    "type": "string",
-                    "default": null,
-                    "description": "Path to your file with settings for \"Favorites Panel\" for Workspace. Not use in User Settings. Use in Workspace Settings"
-                },
-                "favoritesPanel.commands": {
-                    "type": "array",
-                    "default": [],
-                    "description": "Commands for \"Favorites Panel\""
-                },
-                "favoritesPanel.commandsForWorkspace": {
-                    "type": "array",
-                    "default": [],
-                    "description": "Commands for \"Favorites Panel\".  Not use in User Settings. Use in Workspace Settings"
-                },
-                "favoritesPanel.explorerView": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "Move the \"Favorites Panel\" in the explorer view."
-                }
-            }
-        },
-        "menus": {
-            "view/title": [
-                {
-                    "command": "favoritesPanel.refreshPanel",
-                    "when": "view == favoritesPanel || view == favoritesPanelExplorer",
-                    "group": "navigation"
-                },
-                {
-                    "command": "favoritesPanel.openFavoritesPanelSettings",
-                    "when": "view == favoritesPanel || view == favoritesPanelExplorer",
-                    "group": "navigation"
-                },
-                {
-                    "command": "favoritesPanel.openUserJsonSettings",
-                    "when": "view == favoritesPanel || view == favoritesPanelExplorer",
-                    "group": "navigation"
-                },
-                {
-                    "command": "favoritesPanel.openWorkspaceJsonSettings",
-                    "when": "view == favoritesPanel || view == favoritesPanelExplorer",
-                    "group": "navigation"
-                }
-            ]
-        },
-        "commands": [
-            {
-                "command": "favoritesPanel.refreshPanel",
-                "title": "Refresh panel",
-                "category": "Favorites Panel",
-                "icon": "$(refresh)"
-            },
-            {
-                "command": "favoritesPanel.openFavoritesPanelSettings",
-                "title": "Open settings",
-                "category": "Favorites Panel",
-                "icon": "$(gear)"
-            },
-            {
-                "command": "favoritesPanel.openUserJsonSettings",
-                "title": "User JSON settings",
-                "category": "Favorites Panel",
-                "icon": "$(file-code)"
-            },
-            {
-                "command": "favoritesPanel.openWorkspaceJsonSettings",
-                "title": "Workspace JSON settings",
-                "category": "Favorites Panel",
-                "icon": "$(file-code)"
-            }
-        ],
-        "viewsContainers": {
-            "activitybar": [
-                {
-                    "id": "favoritesPanel",
-                    "title": "Favorites Panel",
-                    "icon": "resources/favorites-panel.svg"
-                }
-            ]
-        },
-        "views": {
-            "favoritesPanel": [
-                {
-                    "id": "favoritesPanel",
-                    "name": "Favorites Panel",
-                    "when": "config.favoritesPanel.explorerView != true"
-                }
-            ],
-            "explorer": [
-                {
-                    "id": "favoritesPanelExplorer",
-                    "name": "Favorites Panel",
-                    "contextualTitle": "Favorites Panel",
-                    "icon": "resources/favorites-panel.svg",
-                    "when": "config.favoritesPanel.explorerView == true"
-                }
-            ]
-        }
+        "url": "https://github.com/rbatty19/vscode-pings.git"
     },
     "scripts": {
         "vscode:prepublish": "npm run compile",
@@ -144,6 +37,114 @@
         "watch": "tsc -watch -p ./",
         "pretest": "npm run compile && npm run lint",
         "test": "node ./out/test/runTest.js"
+    },
+    "main": "./out/extension.js",
+    "contributes": {
+        "configuration": {
+            "type": "object",
+            "title": "pings",
+            "properties": {
+                "pings.configPath": {
+                    "type": "string",
+                    "default": null,
+                    "description": "Path to your file with settings for \"Pings\""
+                },
+                "pings.configPathForWorkspace": {
+                    "type": "string",
+                    "default": null,
+                    "description": "Path to your file with settings for \"Pings\" for Workspace. Not use in User Settings. Use in Workspace Settings"
+                },
+                "pings.commands": {
+                    "type": "array",
+                    "default": [],
+                    "description": "Commands for \"Pings\""
+                },
+                "pings.commandsForWorkspace": {
+                    "type": "array",
+                    "default": [],
+                    "description": "Commands for \"Pings\".  Not use in User Settings. Use in Workspace Settings"
+                },
+                "pings.explorerView": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Move the \"Pings\" in the explorer view."
+                }
+            }
+        },
+        "menus": {
+            "view/title": [
+                {
+                    "command": "pings.refreshPanel",
+                    "when": "view == pings || view == pingsExplorer",
+                    "group": "navigation"
+                },
+                {
+                    "command": "pings.openGlobalUserJsonSettings",
+                    "when": "view == pings || view == pingsExplorer"
+                },
+                {
+                    "command": "pings.openUserJsonSettings",
+                    "when": "view == pings || view == pingsExplorer"
+                },
+                {
+                    "command": "pings.openWorkspaceJsonSettings",
+                    "when": "view == pings || view == pingsExplorer"
+                }
+            ]
+        },
+        "commands": [
+            {
+                "command": "pings.refreshPanel",
+                "title": "Refresh panel",
+                "category": "Pings",
+                "icon": "$(refresh)"
+            },
+            {
+                "command": "pings.openGlobalUserJsonSettings",
+                "title": "Global JSON settings",
+                "category": "Pings",
+                "icon": "$(file-code)"
+            },
+            {
+                "command": "pings.openUserJsonSettings",
+                "title": "User JSON settings",
+                "category": "Pings",
+                "icon": "$(file-code)"
+            },
+            {
+                "command": "pings.openWorkspaceJsonSettings",
+                "title": "Workspace JSON settings",
+                "category": "Pings",
+                "icon": "$(file-code)"
+            }
+        ],
+        "viewsContainers": {
+            "activitybar": [
+                {
+                    "id": "pings",
+                    "title": "Pings",
+                    "icon": "resources/pings.svg"
+                }
+            ]
+        },
+        "views": {
+            "pings": [
+                {
+                    "id": "pings",
+                    "name": "Panel",
+                    "when": "config.pings.explorerView != true"
+                }
+            ],
+            "explorer": [
+                {
+                    "id": "pingsExplorer",
+                    "name": "Panel",
+                    "contextualTitle": "Pings",
+                    "icon": "resources/pings.svg",
+                    "when": "config.pings.explorerView == true"
+                }
+            ]
+        }
     },
     "devDependencies": {
         "@types/glob": "^7.1.1",
@@ -157,5 +158,8 @@
         "mocha": "^7.1.2",
         "typescript": "^5.0.2",
         "vscode-test": "^1.5.0"
+    },
+    "dependencies": {
+        "jsonc-parser": "^3.2.0"
     }
 }

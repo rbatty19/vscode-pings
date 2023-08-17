@@ -3,4 +3,7 @@ node_modules
 !.vscode/launch.json
 package-lock.json
 out/**
+.DS_Store
+#
+
 

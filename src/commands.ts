@@ -7,7 +7,7 @@ const {exec} = require('child_process');
 
 // Run program or script
 export function runProgram(program: string) {
-    exec(program, {shell: true, encoding: 'utf8'}, function (err: any, data: any) {
+    exec(program, {shell: true, encoding: 'utf8'}, (err: any, data: any) => {
         console.log(err);
         console.log(data.toString());
     });
@@ -142,7 +142,7 @@ export function runSequence(args: ICommand[]) {
 // DEPRECATED
 export function openUrl(args: any) {
     if (!args[0]) {
-        vscode.window.showErrorMessage('Не найден url!');
+        vscode.window.showErrorMessage('Missing url!');
         return;
     }
     vscode.window.showInformationMessage(`${INFORMATION.DEPRECATED} \n use the "vscode.open" command`);

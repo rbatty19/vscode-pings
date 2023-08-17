@@ -6,10 +6,10 @@ import {TreeItem} from './TreeItem';
 export class FavoritesPanelProvider implements vscode.TreeDataProvider<TreeItem> {
     private _onDidChangeTreeData: vscode.EventEmitter<TreeItem | undefined | void> = new vscode.EventEmitter<TreeItem | undefined | void>();
     readonly onDidChangeTreeData: vscode.Event<TreeItem | undefined | void> = this._onDidChangeTreeData.event;
-    constructor(private commands: any) {}
+    constructor(private commands: any, private context: vscode.ExtensionContext) {}
 
     refresh(): void {
-        this.commands = getCommandsForTree();
+        this.commands = getCommandsForTree(this.context);
         this._onDidChangeTreeData.fire();
     }
 

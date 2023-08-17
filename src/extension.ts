@@ -1,17 +1,19 @@
 import * as demoSettings from '../resources/demosettings.json';
 import * as vscode from 'vscode';
+import * as JSONC from 'jsonc-parser';
 import * as fs from 'fs';
 import * as path from 'path';
-import {PLUGIN_NAME} from './consts';
-import {ICommandWithSequence, IStore, TCommand} from './types';
-import {FavoritesPanelProvider} from './FavoritesPanelProvider';
-import {TreeItem} from './TreeItem';
-import {insertNewCode, openFile, openUrl, runCommand, runProgram, runSequence} from './commands';
-import {Errors} from './Errors';
+import { PLUGIN_NAME } from './consts';
+import { ICommandWithSequence, IStore, TCommand } from './types';
+import { FavoritesPanelProvider } from './FavoritesPanelProvider';
+import { TreeItem } from './TreeItem';
+import { insertNewCode, openFile, openUrl, runCommand, runProgram, runSequence } from './commands';
+import { Errors } from './Errors';
 
 // initial store.
 const store: IStore = {
     commands: [],
+    globalStorageFilePath: ''
 };
 
 export const errors = new Errors();
@@ -71,6 +73,11 @@ const getSequence = (item: ICommandWithSequence) => {
 // Get Commands from configuration.
 const getCommandsFromConf = (): TCommand[] => vscode.workspace.getConfiguration(PLUGIN_NAME).get('commands') || [];
 const getCommandsFromWorkspaceConf = (): TCommand[] => vscode.workspace.getConfiguration(PLUGIN_NAME).get('commandsForWorkspace') || [];
+const getCommandsFromGlobalStore = async (): Promise<TCommand[]> => {
+    // const buffer = await vscode.workspace.fs.readFile(this._storeUri);
+    // this._favorites = (JSON.parse(buffer.toString()) as any[])?.map(f => this.restore(f)) || [];
+    return [];
+};
 
 // Get path to config file.
 const getConfFilePath = (): string => vscode.workspace.getConfiguration(PLUGIN_NAME).get('configPath') || '';
@@ -81,21 +88,30 @@ const getWorkspaceConfFilePath = (): string => vscode.workspace.getConfiguration
  * @param file full path with filename.
  */
 const getCommandsFromFile = (file: string): TCommand[] => {
-    if (file && fs.existsSync(file)) {
-        const json = JSON.parse(fs.readFileSync(file, 'utf8'));
-        if (Array.isArray(json)) {
-            return json;
+    try {
+        if (file && fs.existsSync(file)) {
+
+            const json = file.endsWith('.jsonc')
+                ? JSONC.parse(fs.readFileSync(file, 'utf8'))
+                : JSON.parse(fs.readFileSync(file, 'utf8'));
+
+            if (Array.isArray(json)) {
+                return json;
+            }
+            return json[`${PLUGIN_NAME}.commands`];
         }
-        return json[`${PLUGIN_NAME}.commands`];
-    } else {
-        return [];
+    } catch {
+        console.error(`${getCommandsFromFile.name}: Error`);
     }
+
+    return [];
 };
 
 // Prepare commands for tree view.
-export const getCommandsForTree = () => {
+export const getCommandsForTree = async (context: vscode.ExtensionContext) => {
     const workspaceFolders = vscode.workspace.workspaceFolders?.map((folder) => folder.uri?.fsPath) || [];
     const commands: TCommand[] = [
+        ...getCommandsFromFile(store.globalStorageFilePath),
         ...getCommandsFromConf(),
         ...getCommandsFromWorkspaceConf(),
         ...getCommandsFromFile(getConfFilePath()),
@@ -105,73 +121,109 @@ export const getCommandsForTree = () => {
     if (workspaceFolders.length) {
         workspaceFolders.forEach((filder) => {
             const vscodeFolder = process.platform === 'win32' ? '\\.vscode\\' : '/.vscode/';
-            commands.push(...getCommandsFromFile(path.join(filder, `${vscodeFolder}favoritesPanel.json`)));
+            commands.push(...getCommandsFromFile(path.join(filder, `${vscodeFolder}${'pings.json'}`)));
             commands.push(
-                ...getCommandsFromFile(path.join(filder, '.favoritesPanel.json')),
-                ...getCommandsFromFile(path.join(filder, 'favoritesPanel.json'))
+                ...getCommandsFromFile(path.join(filder, '.pings.json')),
+                ...getCommandsFromFile(path.join(filder, 'pings.json'))
             );
         });
     }
 
-    store.commands = [...commands];
+    Object.assign(store, {
+        commands: [...commands]
+    });
 
     const commandsForTree = store.commands.length ? store.commands : (<any>demoSettings)[`${PLUGIN_NAME}.commands`];
+
     return commandsForTree.map((item: any) => {
-        if (item.commands) {
-            return new TreeItem(
-                item.label,
-                item.commands.map((item: any) => {
-                    return getCommand(item);
-                })
-            );
-        }
-        return getCommand(item);
+        return commandsRender(item);
     });
 };
 
-// Commands activations/
-export function activate(context: vscode.ExtensionContext) {
-    const favoritesPanelProvider = new FavoritesPanelProvider(getCommandsForTree());
-    vscode.window.registerTreeDataProvider('favoritesPanel', favoritesPanelProvider);
-    vscode.window.registerTreeDataProvider('favoritesPanelExplorer', favoritesPanelProvider);
-    vscode.commands.registerCommand(`${PLUGIN_NAME}.refreshPanel`, () => favoritesPanelProvider.refresh());
-    vscode.commands.registerCommand(`${PLUGIN_NAME}.openFavoritesPanelSettings`, () => {
-        runCommand(['workbench.action.openSettings', `@ext:sabitovvt.favorites-panel`]);
-    }),
-        vscode.commands.registerCommand(`${PLUGIN_NAME}.openUserJsonSettings`, () => {
-            runCommand(['workbench.action.openSettingsJson']);
-        }),
-        vscode.commands.registerCommand(`${PLUGIN_NAME}.openWorkspaceJsonSettings`, () => {
-            runCommand(['workbench.action.openWorkspaceSettingsFile']);
-        }),
-
-        context.subscriptions.push(
-            vscode.commands.registerCommand(`${PLUGIN_NAME}.openFile`, (args) => {
-                openFile(args);
-            }),
-            vscode.commands.registerCommand(`${PLUGIN_NAME}.run`, (args) => {
-                runProgram(args[0]);
-            }),
-            // DEPRECATED
-            vscode.commands.registerCommand(`${PLUGIN_NAME}.openUrl`, (args) => {
-                openUrl(args);
-            }),
-            vscode.commands.registerCommand(`${PLUGIN_NAME}.runCommand`, (args) => {
-                runCommand(args);
-            }),
-            vscode.commands.registerCommand(`${PLUGIN_NAME}.insertNewCode`, (args) => {
-                insertNewCode(args);
-            }),
-            vscode.commands.registerCommand(`${PLUGIN_NAME}.runSequence`, (args) => {
-                runSequence(args);
-            })
+function commandsRender(item: any) {
+    if (item.commands) {
+        const { label, commands, icon, iconColor, description } = item;
+        return new TreeItem(
+            label,
+            commands.map((subItem: any) => commandsRender(subItem)),
+            {
+                iconPath: (
+                    icon && new vscode.ThemeIcon(icon, new vscode.ThemeColor(iconColor ?? ''))
+                ) || getIcon(item, iconColor ?? ''),
+                description
+            }
         );
-
-    // Open demo file of settings
-    if (!store.commands.length) {
-        const path = process.platform === 'win32' ? '\\resources\\' : '/resources/';
-        openFile([`${context.extensionPath}${path}demosettings.json`, 'external']);
     }
+    return getCommand(item);
 }
 
-export function deactivate() {}
+async function checkGlobalStoreFile(storeUri: vscode.Uri) {
+    try {
+        await vscode.workspace.fs.readFile(storeUri);
+    } catch {
+        await vscode.workspace.fs.writeFile(storeUri, Buffer.from(JSON.stringify(demoSettings, null, 4), 'utf8'));
+        vscode.window.showTextDocument(storeUri, { preview: false, preserveFocus: false });
+    }
+    Object.assign(store, {
+        globalStorageFilePath: storeUri.fsPath
+    });
+}
+
+// Commands activations/
+export async function activate(context: vscode.ExtensionContext) {
+
+    const globalStorageUri = context.globalStorageUri;
+    vscode.workspace.fs.createDirectory(globalStorageUri);
+    const storeUri = vscode.Uri.joinPath(globalStorageUri, 'ping.setting.jsonc');
+    await checkGlobalStoreFile(storeUri);
+
+    const favoritesPanelProvider = new FavoritesPanelProvider(getCommandsForTree(context), context);
+
+    vscode.window.registerTreeDataProvider('pings', favoritesPanelProvider);
+    vscode.window.registerTreeDataProvider('pingsExplorer', favoritesPanelProvider);
+
+    vscode.commands.registerCommand(`${PLUGIN_NAME}.refreshPanel`, () => favoritesPanelProvider.refresh());
+
+    // vscode.commands.registerCommand(`${PLUGIN_NAME}.openFavoritesPanelSettings`, () => {
+    //     runCommand(['workbench.action.openSettings', `@ext:sabitovvt.favorites-panel`]);
+    // });
+    vscode.commands.registerCommand(`${PLUGIN_NAME}.openUserJsonSettings`, () => {
+        runCommand(['workbench.action.openSettingsJson']);
+    });
+    vscode.commands.registerCommand(`${PLUGIN_NAME}.openGlobalUserJsonSettings`, () => {
+        vscode.window.showTextDocument(storeUri, { preview: false, preserveFocus: false });
+    });
+    vscode.commands.registerCommand(`${PLUGIN_NAME}.openWorkspaceJsonSettings`, () => {
+        runCommand(['workbench.action.openWorkspaceSettingsFile']);
+    });
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand(`${PLUGIN_NAME}.openFile`, (args) => {
+            openFile(args);
+        }),
+        vscode.commands.registerCommand(`${PLUGIN_NAME}.run`, (args) => {
+            runProgram(args[0]);
+        }),
+        // DEPRECATED
+        vscode.commands.registerCommand(`${PLUGIN_NAME}.openUrl`, (args) => {
+            openUrl(args);
+        }),
+        vscode.commands.registerCommand(`${PLUGIN_NAME}.runCommand`, (args) => {
+            runCommand(args);
+        }),
+        vscode.commands.registerCommand(`${PLUGIN_NAME}.insertNewCode`, (args) => {
+            insertNewCode(args);
+        }),
+        vscode.commands.registerCommand(`${PLUGIN_NAME}.runSequence`, (args) => {
+            runSequence(args);
+        })
+    );
+
+    // // Open demo file of settings
+    // if (!store.commands.length) {
+    //     const path = process.platform === 'win32' ? '\\resources\\' : '/resources/';
+    //     openFile([`${context.extensionPath}${path}demosettings.json`, 'external']);
+    // }
+}
+
+export function deactivate() { }

@@ -1,11 +1,12 @@
 
-[![Version](https://img.shields.io/visual-studio-marketplace/v/sabitovvt.favorites-panel)](https://marketplace.visualstudio.com/items?itemName=sabitovvt.favorites-panel) [![Installs](https://img.shields.io/visual-studio-marketplace/i/sabitovvt.favorites-panel)](https://marketplace.visualstudio.com/items?itemName=sabitovvt.favorites-panel) [![Rating](https://img.shields.io/visual-studio-marketplace/r/sabitovvt.favorites-panel)](https://marketplace.visualstudio.com/items?itemName=sabitovvt.favorites-panel) [![OpenVSX Downloads](https://shields.io/open-vsx/dt/sabitovvt/favorites-panel?label=OpenVSX%20installs)](https://open-vsx.org/extension/sabitovvt/favorites-panel) [![Stars](https://img.shields.io/github/stars/sabitovvt/vscode-favorites-panel?logo=github)](https://github.com/sabitovvt/vscode-favorites-panel) [![Forks](https://img.shields.io/github/forks/sabitovvt/vscode-favorites-panel?logo=github)](https://github.com/sabitovvt/vscode-favorites-panel)
+[![Version](https://img.shields.io/visual-studio-marketplace/v/rbatty19.pings)](https://marketplace.visualstudio.com/items?itemName=rbatty19.pings) [![Installs](https://img.shields.io/visual-studio-marketplace/i/rbatty19.pings)](https://marketplace.visualstudio.com/items?itemName=rbatty19.pings) [![Rating](https://img.shields.io/visual-studio-marketplace/r/rbatty19.pings)](https://marketplace.visualstudio.com/items?itemName=rbatty19.pings) [![OpenVSX Downloads](https://shields.io/open-vsx/dt/rbatty19/pings?label=OpenVSX%20installs)](https://open-vsx.org/extension/rbatty19/pings) [![Stars](https://img.shields.io/github/stars/rbatty19/vscode-pings?logo=github)](https://github.com/rbatty19/vscode-pings) [![Forks](https://img.shields.io/github/forks/rbatty19/vscode-pings?logo=github)](https://github.com/rbatty19/vscode-pings)
 
-# Favorites Panel
+[ThemeIcon ids](https://code.visualstudio.com/api/references/icons-in-labels#icon-listing)
+# Pings
 
 The extension adds a panel for accessing frequently used commands, files, directories, URLs, programs, snippets. The panel can be standalone or as part of the Explorer (In this case, you can drag the panel like any other to the desired location).
 
-![Favorites Panel](preview/screenshot_0.png)
+![pings](preview/screenshot_0.png)
 
 ## Features
 
@@ -17,31 +18,30 @@ The extension adds a panel for accessing frequently used commands, files, direct
 - Setting icons for commands
 - Separation setting for different workspaces
 
-
 ## Extension Settings
 
 The extension requires initial configuration.
 Edit the settings file VSCODE.
 If extension settings are not specified, demo settings will be used.
 
-The extension settings are in section **"favoritesPanel.commands": []** in the Settings(settings.json)
-You can also place settings in custom files **favoritesPanel.configPath**
+The extension settings are in section **"pings.commands": []** in the Settings(settings.json)
+You can also place settings in custom files **pings.configPath**
 
-If you want to make specific settings for each workspace, then use **favoritesPanel.commandsForWorkspace** or
- **favoritesPanel.configPathForWorkspace**. in the workspace settings.
+If you want to make specific settings for each workspace, then use **pings.commandsForWorkspace** or
+ **pings.configPathForWorkspace**. in the workspace settings.
 
 The order of loading and displaying the settings:
-- **Settings: favoritesPanel.commands**
-- **Settings: favoritesPanel.commandsForWorkspace**
-- **Settings: favoritesPanel.configPath: "full_path_to_custom_configuration_file"**
-- **Settings: favoritesPanel.configPathForWorkspace: "full_path_to_custom_configuration_file"**
-- **.vscode/favoritesPanel.json** in project folder
-- **.favoritesPanel.json** in project folder
-- **favoritesPanel.json** in project folder
+- **Settings: pings.commands**
+- **Settings: pings.commandsForWorkspace**
+- **Settings: pings.configPath: "full_path_to_custom_configuration_file"**
+- **Settings: pings.configPathForWorkspace: "full_path_to_custom_configuration_file"**
+- **.vscode/pings.json** in project folder
+- **.pings.json** in project folder
+- **pings.json** in project folder
 
-### favoritesPanel.commands
+### pings.commands
 ```json
-"favoritesPanel.commands": [
+"pings.commands": [
     {
         "label": "README",
         "description": "- read me",
@@ -53,11 +53,11 @@ The order of loading and displaying the settings:
 ]
 ```
 
-### favoritesPanel.commandsForWorkspace
+### pings.commandsForWorkspace
 Use this setting if you wish to set specific settings for the workspace.
 >Please note that you need to specify this setting in the workspace setting, not the User settings
 ```json
-"favoritesPanel.commandsForWorkspace": [
+"pings.commandsForWorkspace": [
     {
         "label": "README",
         "description": "- read me",
@@ -69,16 +69,16 @@ Use this setting if you wish to set specific settings for the workspace.
 ]
 ```
 
-### favoritesPanel.configPath
+### pings.configPath
 Example for OS Windows
 ```json
-"favoritesPanel.configPath": "C:\\Projects\\favoritesPanel.json"
+"pings.configPath": "C:\\Projects\\pings.json"
 ```
 
 Early versions of the extension prior to 1.3.0 only supported:
 ```json
 {
-    "favoritesPanel.commands": [
+    "pings.commands": [
         {
             "label": "README",
             "description": " - Important!",
@@ -118,19 +118,19 @@ Since version 1.4.0 you can also use a simplified version:
 ```
 
 
-### favoritesPanel.configPathForWorkspace
+### pings.configPathForWorkspace
 Use this setting if you wish to set specific settings for the workspace.
 >Please note that you need to specify this setting in the workspace setting, not the User settings
 
 Example for OS Windows
 ```json
-"favoritesPanel.configPathForWorkspace": "C:\\Projects\\Project1\\favoritesPanelForMyProject1.json"
+"pings.configPathForWorkspace": "C:\\Projects\\Project1\\pingsForMyProject1.json"
 ```
 
 Early versions of the extension prior to 1.3.0 only supported:
 ```json
 {
-    "favoritesPanel.commands": [
+    "pings.commands": [
         {
             "label": "README",
             "description": " - Important!",
@@ -169,15 +169,15 @@ Since version 1.4.0 you can also use a simplified version:
 ]
 ```
 
-### favoritesPanel.explorerView
-moves the "Favorites Panel" in the explorer view. This allows you to drag the panel to a different location. Examples are shown in the screenshots.
+### pings.explorerView
+moves the "pings" in the explorer view. This allows you to drag the panel to a different location. Examples are shown in the screenshots.
 ```json
-"favoritesPanel.explorerView": true
+"pings.explorerView": true
 ```
 
 Secondary Side Bar | Bottom Panel
 :-------------------------:|:-------------------------:
-![Favorites Panel](preview/screenshot_1_1.png) | ![Favorites Panel](preview/screenshot_1_2.png)
+![pings](preview/screenshot_1_1.png) | ![pings](preview/screenshot_1_2.png)
 
 ## Displayed command settings
 You must set the required parameter __label__.
@@ -214,8 +214,8 @@ You can also define your own colors for use in the extension.
 You need to add to the Visual Studio Code settings:
 ```js
 "workbench.colorCustomizations": {
-    "favoritesPanel.myColorGreen": "#006700",
-    "favoritesPanel.myColorBlue": "#000067"
+    "pings.myColorGreen": "#006700",
+    "pings.myColorBlue": "#000067"
 },
 ```
 
@@ -224,12 +224,12 @@ And in the extension settings specify:
 {
     "command": "openFile",
     "icon": "file",
-    "iconColor": "favoritesPanel.myColorGreen",
+    "iconColor": "pings.myColorGreen",
 },
 {
     "command": "openFile",
     "icon": "file",
-    "iconColor": "favoritesPanel.myColorBlue",
+    "iconColor": "pings.myColorBlue",
 },
 ```
 
@@ -248,7 +248,7 @@ And in the extension settings specify:
     ]
 }
 ```
-![Favorites Panel](preview/lowercase_to_uppercase.gif)
+![pings](preview/lowercase_to_uppercase.gif)
 
 
 ### Opening file
@@ -428,7 +428,7 @@ running multiple commands
 Copy this snippet of settings into settings.json file (VS Code settings file) to see the extension in action.
 
 ```json
-"favoritesPanel.commands": [
+"pings.commands": [
     {
         "label": "README",
         "description": " - Important!",
