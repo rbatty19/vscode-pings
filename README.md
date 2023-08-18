@@ -586,11 +586,6 @@ Copy this snippet of settings into settings.json file (VS Code settings file) to
 ]
 ```
 
+## References
 
-
-## Release Notes
-
-### 1.4.1 | 2023/03/30
-- Fixed Error.
-
-More information in the [changelog](CHANGELOG.md "Changelog")
+<https://code.visualstudio.com/api/references/when-clause-contexts>

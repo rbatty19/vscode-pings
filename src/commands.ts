@@ -1,13 +1,14 @@
 import * as vscode from 'vscode';
-import {ERRORS, INFORMATION} from './consts';
-import {errors} from './extension';
-import {ICommand} from './types';
+import { ERRORS, INFORMATION } from './consts';
+import { errors } from './extension';
+import { ICommand } from './types';
+import { homedir } from 'os';
 
-const {exec} = require('child_process');
+const { exec } = require('child_process');
 
 // Run program or script
 export function runProgram(program: string) {
-    exec(program, {shell: true, encoding: 'utf8'}, (err: any, data: any) => {
+    exec(program, { shell: true, encoding: 'utf8' }, (err: any, data: any) => {
         console.log(err);
         console.log(data.toString());
     });
@@ -33,6 +34,41 @@ export function openFile(args: any) {
             vscode.window.showErrorMessage(`${ERRORS.FILE_NOT_FOUND}: ${document}`);
         }
     );
+}
+
+export function openFolder(payload: any, newWindow = false) {
+    // const projectPath: string = vscode.workspace.rootPath || '';
+
+    let path: string = payload?.command?.arguments ?? '';
+
+    if (path.startsWith('~/'))
+        path = path.replace('~', homedir());
+
+    console.log(process.platform);
+    console.log(path);
+
+    const uri = vscode.Uri.file(path);
+    vscode.commands.executeCommand('vscode.openFolder', uri, newWindow);
+
+    // if (args[1] !== 'external' && !!projectPath) {
+    //     document = process.platform === 'win32' ? `${projectPath}\\${args[0]}` : `${projectPath}/${args[0]}`;
+    // } else {
+    //     document = args[0];
+    // }
+
+    // vscode.workspace.openTextDocument(document).then(
+    //     (doc) => {
+    //         vscode.window.showTextDocument(doc);
+    //     },
+    //     () => {
+    //         vscode.window.showErrorMessage(`${ERRORS.FILE_NOT_FOUND}: ${document}`);
+    //     }
+    // );
+
+    // openFolder(newWindow = false) {
+    //     const uri = vscode.Uri.file(this.absoluteFolderPath)
+    //     vscode.commands.executeCommand('vscode.openFolder', uri, newWindow)
+    // }
 }
 
 // Run VSCode command
@@ -122,6 +158,8 @@ export function runSequence(args: ICommand[]) {
         switch (item.command) {
             case 'openFile':
                 openFile(item.arguments);
+                // case 'openFolder':
+                //     runCommand(item.arguments);
                 break;
             case 'run':
                 runProgram(item.arguments?.[0]);
@@ -136,15 +174,4 @@ export function runSequence(args: ICommand[]) {
                 vscode.window.showInformationMessage('This command is not supported in Sequence');
         }
     });
-}
-
-// Open URL
-// DEPRECATED
-export function openUrl(args: any) {
-    if (!args[0]) {
-        vscode.window.showErrorMessage('Missing url!');
-        return;
-    }
-    vscode.window.showInformationMessage(`${INFORMATION.DEPRECATED} \n use the "vscode.open" command`);
-    vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(args[0]));
 }

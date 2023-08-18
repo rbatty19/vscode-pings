@@ -14,6 +14,7 @@ export class FavoritesPanelProvider implements vscode.TreeDataProvider<TreeItem>
     }
 
     getTreeItem(element: TreeItem): vscode.TreeItem | Thenable<TreeItem> {
+        console.log(element.command);
         return element;
     }
 

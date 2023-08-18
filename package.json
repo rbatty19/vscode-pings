@@ -2,7 +2,7 @@
     "name": "pings",
     "displayName": "Pings",
     "description": "Use the extension to create a panel with your favorite commands, folders, files, URLs.",
-    "version": "1.0.0",
+    "version": "1.0.6",
     "publisher": "rbatty19",
     "engines": {
         "vscode": "^1.53.0"
@@ -72,6 +72,18 @@
             }
         },
         "menus": {
+            "view/item/context": [
+                {
+                    "command": "pings.openFolderInWindow",
+                    "when": "false && view == pings && viewItem == openFolder",
+                    "group": "inline"
+                },
+                {
+                    "command": "pings.openFolderInNewWindow",
+                    "when": "view == pings && viewItem == openFolder ",
+                    "group": "inline"
+                }
+            ],
             "view/title": [
                 {
                     "command": "pings.refreshPanel",
@@ -116,6 +128,16 @@
                 "title": "Workspace JSON settings",
                 "category": "Pings",
                 "icon": "$(file-code)"
+            },
+            {
+                "command": "pings.openFolderInWindow",
+                "title": "Open Folder",
+                "icon": "$(window)"
+            },
+            {
+                "command": "pings.openFolderInNewWindow",
+                "title": "Open Folder in New Window",
+                "icon": "$(folder-opened)"
             }
         ],
         "viewsContainers": {

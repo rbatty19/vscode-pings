@@ -8,5 +8,7 @@ export class TreeItem extends vscode.TreeItem {
         this.children = children;
         this.iconPath = extra?.iconPath;
         this.description = extra?.description;
+        this.tooltip = extra?.description;
+        this.contextValue = '';
     }
 }

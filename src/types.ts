@@ -14,6 +14,7 @@ export interface IItem extends vscode.TreeItem {
     command?: any;
     iconPath: any;
     iconColor?: string;
+    contextValue?: string;
 }
 
 export interface ICommand {
@@ -23,6 +24,8 @@ export interface ICommand {
     iconColor?: string;
     command: string;
     arguments?: Array<any>;
+    path?: Array<any>;
+    options?: any;
 }
 
 export interface ICommandWithSequence {
@@ -33,4 +36,6 @@ export interface ICommandWithSequence {
     sequence?: Array<ICommand>;
     command?: string;
     arguments?: Array<any>;
+    path?: Array<any>;
+    options?: any;
 }
