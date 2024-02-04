@@ -219,7 +219,7 @@ function itemRender(item: any) {
                 command: `${PLUGIN_NAME}.${item.command}`,
                 arguments: argsByCommand[`${item!.command}`] ?? [item.arguments],
             },
-        }: {};
+        } : {};
 
         return new TreeItem(
             label,
@@ -354,7 +354,7 @@ export async function activate(context: vscode.ExtensionContext) {
             indexes: [index]
         }));
 
-        vscode.window.showInformationMessage(`currenItemChain ${JSON.stringify(currentItemChain, null, 2)}`);
+        // vscode.window.showInformationMessage(`currenItemChain ${JSON.stringify(currentItemChain, null, 2)}`);
 
         const baseRootItem = currentItemChain.length >= 2 ? [{
             label: 'base',
@@ -378,12 +378,28 @@ export async function activate(context: vscode.ExtensionContext) {
         const tempData = commandsFromStore;
         const tempStoreName = Object.keys({ tempData }).pop();
 
-        if (currentItemChain.length >= 2) pickedCommand?.chain.pop();
+        // vscode.window.showWarningMessage(`pickedCommand?.chain.length (b): ${pickedCommand?.chain.length}`);
+
+        const isPickedBase = pickedCommand?.chain.length < 2;
+
+        // vscode.window.showWarningMessage(`pickedCommand.chain: ${pickedCommand?.chain.join('')}`);
+
+        if (pickedCommand?.chain.join('').endsWith("['commands']")) pickedCommand?.chain.pop();
+
+        // vscode.window.showWarningMessage(`tempData${pickedCommand?.chain.join('')}`);
 
         const result = eval(`${tempStoreName}${pickedCommand?.chain.join('')}`);
 
-        if (currentItemChain.length >= 2 && result?.['commands']) {
-            if (!result?.['commands']) Object.assign(result, { commands: [] });
+        // vscode.window.showWarningMessage(`result ${JSON.stringify(result, null, 2)}`);
+
+        if (!isPickedBase && !result?.['commands']) Object.assign(result, { commands: [] });
+
+        // vscode.window.showWarningMessage(`result?.['commands'].length ${JSON.stringify(result?.['commands'].length, null, 2)}`);
+        // vscode.window.showWarningMessage(`result?.length ${JSON.stringify(result?.length, null, 2)}`);
+        // vscode.window.showWarningMessage(`result ${JSON.stringify(result, null, 2)}`);
+
+        if (result?.['commands']) {
+            // vscode.window.showWarningMessage(`is here`);
             result?.['commands'].splice(result?.['commands'].length, 0, itemToMove);
         } else
             result.splice(result?.length, 0, itemToMove);
