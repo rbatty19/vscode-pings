@@ -4,44 +4,61 @@ import { errors } from './extension';
 import { ICommand } from './types';
 import { homedir } from 'os';
 
-const { exec } = require('child_process');
+// const { execSync } = require('child_process');
+import { exec } from 'child_process';
 
 // Run program or script
-export function runProgram(program: string) {
-    exec(program, { shell: true, encoding: 'utf8' }, (err: any, data: any) => {
-        console.log(err);
+export function runProgram([program]: any) {
+    exec(program, { shell: 'true' }, (err: any, data: any) => {
+        console.log({ err });
         console.log(data.toString());
     });
 }
 
+
 // Open file
 export function openFile(args: any) {
-    const projectPath: string = vscode.workspace.rootPath || '';
 
-    let document: string;
+    console.log('args: ', JSON.stringify(args));
 
-    if (args[1] !== 'external' && !!projectPath) {
-        document = process.platform === 'win32' ? `${projectPath}\\${args[0]}` : `${projectPath}/${args[0]}`;
-    } else {
-        document = args[0];
-    }
+    let path: string = args ?? '';
 
-    vscode.workspace.openTextDocument(document).then(
-        (doc) => {
-            vscode.window.showTextDocument(doc);
-        },
-        () => {
-            vscode.window.showErrorMessage(`${ERRORS.FILE_NOT_FOUND}: ${document}`);
-        }
-    );
+    if (typeof path === 'string' && path.startsWith('~/'))
+        path = path.replace('~', homedir());
+
+    console.log(process.platform);
+    console.log(path);
+
+    const uri = vscode.Uri.file(path);
+    vscode.commands.executeCommand('vscode.open', uri);
+
+    // const projectPath: string = vscode.workspace.rootPath || '';
+
+    // let document: string;
+
+    // if (args[1] !== 'external' && !!projectPath) {
+    //     document = process.platform === 'win32' ? `${projectPath}\\${args[0]}` : `${projectPath}/${args[0]}`;
+    // } else {
+    //     document = args[0];
+    // }
+
+    // vscode.workspace.openTextDocument(document).then(
+    //     (doc) => {
+    //         vscode.window.showTextDocument(doc);
+    //     },
+    //     () => {
+    //         vscode.window.showErrorMessage(`${ERRORS.FILE_NOT_FOUND}: ${document}`);
+    //     }
+    // );
 }
 
 export function openFolder(payload: any, newWindow = false) {
     // const projectPath: string = vscode.workspace.rootPath || '';
+    console.log('args: ', JSON.stringify(payload));
 
     let path: string = payload?.command?.arguments ?? '';
 
-    if (path.startsWith('~/'))
+    if (typeof path === 'string' && path.startsWith('~/'))
         path = path.replace('~', homedir());
 
     console.log(process.platform);

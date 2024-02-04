@@ -18,6 +18,7 @@ export interface IItem extends vscode.TreeItem {
 }
 
 export interface ICommand {
+    id?: string;
     label: string;
     description?: string;
     icon?: string;
@@ -29,6 +30,7 @@ export interface ICommand {
 }
 
 export interface ICommandWithSequence {
+    id?: string;
     label: string;
     description?: string;
     icon?: string;

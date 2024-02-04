@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 import * as JSONC from 'jsonc-parser';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as shortUUID from 'short-uuid';
 import { PLUGIN_NAME } from './consts';
 import { ICommandWithSequence, IStore, TCommand } from './types';
 import { FavoritesPanelProvider } from './FavoritesPanelProvider';
@@ -18,14 +19,38 @@ const store: IStore = {
 
 export const errors = new Errors();
 
+const checkFileOrFolder = (pathFile: any) => {
+
+    function currentPageUri() {
+        return vscode.window.activeTextEditor
+            && vscode.window.activeTextEditor.document
+            && vscode.window.activeTextEditor.document.uri;
+    }
+
+    try {
+        let uri;
+        if (pathFile) {
+            uri = pathFile?.fsPath;
+        } else {
+            const _path = currentPageUri();
+            uri = _path && _path.fsPath;
+        }
+
+        const scheme = fs.lstatSync(uri).isDirectory() ? 'folder' : fs.lstatSync(uri).isFile() ? 'file' : 'unknown';
+        return { scheme, uri };
+    } catch {
+        return {};
+    }
+};
+
 // get Icon
 const getIcon = (item: any, color: string) => {
     const themeColor = new vscode.ThemeColor(color ?? '');
     switch (item.command) {
         case 'openFile':
-            return new vscode.ThemeIcon('symbol-file', themeColor);
+            return vscode.ThemeIcon.File;
         case 'openFolder':
-            return new vscode.ThemeIcon('symbol-folder', themeColor);
+            return vscode.ThemeIcon.Folder;
         case 'run':
             return new vscode.ThemeIcon('console', themeColor);
         case 'runCommand':
@@ -33,7 +58,7 @@ const getIcon = (item: any, color: string) => {
         case 'insertNewCode':
             return new vscode.ThemeIcon('find-replace', themeColor);
         default:
-            return vscode.ThemeIcon.File;
+            return new vscode.ThemeIcon('open-editors-view-icon', themeColor);
     }
 };
 
@@ -42,18 +67,38 @@ const getCommand = (item: ICommandWithSequence) => {
     if (item.sequence) {
         return getSequence(item);
     }
-    return {
-        label: item.label,
-        description: item.description,
-        contextValue: item.command,
-        command: {
-            command: `${PLUGIN_NAME}.${item.command}`,
-            arguments: ['openFolder'].includes(item.command ?? '') ? item?.path : [item.arguments],
-        },
-        iconPath:
-            (item.icon && new vscode.ThemeIcon(item.icon, new vscode.ThemeColor(item.iconColor ?? ''))) ||
-            getIcon(item, item.iconColor ?? ''),
+
+    const argsByCommand: Record<string, unknown> = {
+        openFolder: item?.path,
+        openFile: [item?.path],
     };
+
+    const { scheme } = checkFileOrFolder({ fsPath: item?.path });
+
+    const iconPathRaw = (item?.icon && new vscode.ThemeIcon(
+        item.icon,
+        new vscode.ThemeColor(item.iconColor ?? '')
+    )) || getIcon(item, item.iconColor ?? '');
+
+    const iconPath = item.icon ? { iconPath: iconPathRaw } : {};
+
+    // console.log('item:', JSON.stringify(item, null, 2)); // TODO 123
+    return new TreeItem(
+        item.label,
+        // scheme === 'folder' ? [] : undefined,
+        undefined,
+        {
+            ...iconPath,
+            description: item.description,
+            fsPath: item?.path,
+            command: {
+                command: `${PLUGIN_NAME}.${item.command}`,
+                arguments: argsByCommand[`${item!.command}`] ?? [item.arguments],
+            },
+            contextValue: item.command,
+            id: item?.id ?? shortUUID.generate()
+        }
+    );
 };
 
 // Get Sequence from item of settings
@@ -68,6 +113,7 @@ const getSequence = (item: ICommandWithSequence) => {
         iconPath:
             (item.icon && new vscode.ThemeIcon(item.icon, new vscode.ThemeColor(item.iconColor ?? ''))) ||
             getIcon(item, item.iconColor ?? ''),
+        id: item?.id ?? shortUUID.generate()
     };
 };
 
@@ -91,9 +137,9 @@ const getCommandsFromFile = (file: string): TCommand[] => {
                 ? JSONC.parse(fs.readFileSync(file, 'utf8'))
                 : JSON.parse(fs.readFileSync(file, 'utf8'));
 
-            if (Array.isArray(json)) {
+            if (Array.isArray(json))
                 return json;
-            }
+
             return json[`${PLUGIN_NAME}.commands`];
         }
     } catch {
@@ -101,6 +147,28 @@ const getCommandsFromFile = (file: string): TCommand[] => {
     }
 
     return [];
+};
+
+export const writeNewCommandInGlobalStore = async ({ data, commandsStore }: any) => {
+
+    const file = store.globalStorageFilePath;
+
+    if (!(file && fs.existsSync(file))) {
+        console.log('Global Store FILE does not exist');
+        return;
+    }
+
+    if (!commandsStore) commandsStore = getCommandsFromFile(file);
+
+    const newData = data ? [data] : [];
+
+    await vscode.workspace.fs.writeFile(
+        vscode.Uri.file(file),
+        Buffer.from(JSON.stringify({
+            [`${PLUGIN_NAME}.commands`]: [...commandsStore, ...newData]
+        }, null, 4), 'utf8')
+    );
+
 };
 
 // Prepare commands for tree view.
@@ -115,12 +183,12 @@ export const getCommandsForTree = async (context: vscode.ExtensionContext) => {
     ];
 
     if (workspaceFolders.length) {
-        workspaceFolders.forEach((filder) => {
+        workspaceFolders.forEach((folder) => {
             const vscodeFolder = process.platform === 'win32' ? '\\.vscode\\' : '/.vscode/';
-            commands.push(...getCommandsFromFile(path.join(filder, `${vscodeFolder}${'pings.json'}`)));
+            commands.push(...getCommandsFromFile(path.join(folder, `${vscodeFolder}${'pings.json'}`)));
             commands.push(
-                ...getCommandsFromFile(path.join(filder, '.pings.json')),
-                ...getCommandsFromFile(path.join(filder, 'pings.json'))
+                ...getCommandsFromFile(path.join(folder, '.pings.json')),
+                ...getCommandsFromFile(path.join(folder, 'pings.json'))
             );
         });
     }
@@ -131,14 +199,28 @@ export const getCommandsForTree = async (context: vscode.ExtensionContext) => {
 
     const commandsForTree = store.commands.length ? store.commands : (<any>demoSettings)[`${PLUGIN_NAME}.commands`];
 
-    return commandsForTree.map((item: any) => {
-        return itemRender(item);
-    });
+    return commandsForTree.map(
+        (item: any) => itemRender(item)
+    );
 };
 
 function itemRender(item: any) {
     if (item.commands) {
-        const { label, commands, icon, iconColor, description } = item;
+        const { label, commands, icon, iconColor, description, id, path } = item;
+        const currentCommand: any = getCommand(item);
+
+
+        const argsByCommand: Record<string, unknown> = {
+            openFolder: item?.path,
+            openFile: [item?.path],
+        };
+        const command = item?.command ? {
+            command: {
+                command: `${PLUGIN_NAME}.${item.command}`,
+                arguments: argsByCommand[`${item!.command}`] ?? [item.arguments],
+            },
+        }: {};
+
         return new TreeItem(
             label,
             commands.map((subItem: any) => itemRender(subItem)),
@@ -146,7 +228,12 @@ function itemRender(item: any) {
                 iconPath: (
                     icon && new vscode.ThemeIcon(icon, new vscode.ThemeColor(iconColor ?? ''))
                 ) || getIcon(item, iconColor ?? ''),
-                description
+                // ...{ iconPath },
+                ...command,
+                description,
+                contextValue: currentCommand.contextValue,
+                id,
+                fsPath: path,
             }
         );
     }
@@ -170,7 +257,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
     const globalStorageUri = context.globalStorageUri;
     vscode.workspace.fs.createDirectory(globalStorageUri);
-    const storeUri = vscode.Uri.joinPath(globalStorageUri, 'ping.setting.jsonc');
+    const storeUri = vscode.Uri.joinPath(globalStorageUri, 'ping.setting.jsonc'); // TODO store the storeUri in some higher scope
     await checkGlobalStoreFile(storeUri);
 
     const favoritesPanelProvider = new FavoritesPanelProvider(getCommandsForTree(context), context);
@@ -190,14 +277,159 @@ export async function activate(context: vscode.ExtensionContext) {
         runCommand(['workbench.action.openWorkspaceSettingsFile']);
     });
 
+    vscode.commands.registerCommand(`${PLUGIN_NAME}.ShowInfo`, (item) => {
+        vscode.window.showInformationMessage(`running AddFileToGlobalStore ${JSON.stringify({ item }, null, 2)}`);
+    });
+
+    vscode.commands.registerCommand(`${PLUGIN_NAME}.AddFileToGlobalStore`, async (pathFile) => {
+
+        const { scheme, uri } = checkFileOrFolder(pathFile);
+
+        await writeNewCommandInGlobalStore({
+            data: {
+                id: shortUUID.generate(),
+                label: path.basename(uri),
+                path: uri,
+                icon: scheme === 'folder' ? 'folder' : 'file',
+                description: path.basename(uri),
+                command: scheme === 'folder' ? 'openFolder' : 'openFile',
+            }
+        });
+
+        vscode.commands.executeCommand(`${PLUGIN_NAME}.refreshPanel`);
+        vscode.commands.executeCommand(`${PLUGIN_NAME}.focus`);
+
+        vscode.window.showInformationMessage(`running AddFileToGlobalStore ${JSON.stringify({ pathFile })}`);
+    });
+
+    vscode.commands.registerCommand(`${PLUGIN_NAME}.MoveItemToGroup`, async (item) => {
+
+        // if (!item?.id) {
+        //     vscode.window.showWarningMessage(`This Item doesn't have "id"`);
+        //     return;
+        // }
+
+        const { nodeChain: currentItemChain, item: itemToMove } = buildNodeChainById(item?.id);
+
+        if (!currentItemChain?.length) {
+            vscode.window.showWarningMessage(`This Item doesn't have "id" or chain`);
+            return;
+        }
+
+        const parentChain = (currentItemChain.length > 2)
+            ? [...currentItemChain].slice(0, currentItemChain.length - 1)
+            : [];
+
+        const commandsFromStore = getCommandsFromFile(store.globalStorageFilePath);
+
+        const roots: unknown[] = [];
+
+        function rootAnalyzer(item: any, root: string[] = [], extra: any) {
+            const { label, commands, description } = item;
+            const currentRoot: any = [...root, label];
+            if ((item.commands || item.command === 'openFolder')
+                // && (extra.chain.join('') !== parentChain!.join(''))
+                && (extra.chain.join('') !== `${currentItemChain.join('')}['commands']`)
+            ) {
+                roots.push({
+                    path: currentRoot.join(' → '),
+                    description,
+                    label,
+                    chain: extra.chain,
+                    indexes: extra.indexes,
+                    size: item.commands ? item.commands.length : 'empty'
+                });
+                if (item.commands)
+                    commands.forEach((subItem: any, index: number) =>
+                        rootAnalyzer(subItem, currentRoot, {
+                            chain: [...extra.chain, `[${index}]`, `['commands']`],
+                            indexes: [...extra.indexes, index],
+                        })
+                    );
+            }
+        }
+        commandsFromStore.forEach((item: any, index) => rootAnalyzer(item, [], {
+            chain: [`[${index}]`, `['commands']`],
+            index,
+            indexes: [index]
+        }));
+
+        vscode.window.showInformationMessage(`currenItemChain ${JSON.stringify(currentItemChain, null, 2)}`);
+
+        const baseRootItem = currentItemChain.length >= 2 ? [{
+            label: 'base',
+            key: -1,
+            description: 'root',
+            chain: [],
+            size: commandsFromStore.length
+        }] : [];
+
+        const pickedCommand = await vscode.window.showQuickPick([...baseRootItem, ...roots.map(({ description, path, chain, size }: any, key) => ({
+            label: path,
+            key,
+            description: `${chain.join('')}: ${description}`,
+            // description: `${JSON.stringify(indexes)} : ${description}`,
+            chain,
+            size
+        }))], {
+            title: `Select the new location:`,
+        });
+
+        const tempData = commandsFromStore;
+        const tempStoreName = Object.keys({ tempData }).pop();
+
+        if (currentItemChain.length >= 2) pickedCommand?.chain.pop();
+
+        const result = eval(`${tempStoreName}${pickedCommand?.chain.join('')}`);
+
+        if (currentItemChain.length >= 2 && result?.['commands']) {
+            if (!result?.['commands']) Object.assign(result, { commands: [] });
+            result?.['commands'].splice(result?.['commands'].length, 0, itemToMove);
+        } else
+            result.splice(result?.length, 0, itemToMove);
+
+        const [last] = JSON.parse(currentItemChain.pop()!);
+        const reff = eval(`${tempStoreName}${currentItemChain.join('')}`);
+
+        reff.splice(last, 1);
+
+        await writeNewCommandInGlobalStore({ commandsStore: tempData });
+
+        vscode.commands.executeCommand(`${PLUGIN_NAME}.refreshPanel`);
+    });
+
+    function buildNodeChainById(id: string) {
+        const commandsFromStore = getCommandsFromFile(store.globalStorageFilePath);
+        let nodeChain: string[] = [];
+        let globalItem: any;
+        const searchIdItem = (item: any, index: number, indexes: string[] = []) => {
+            indexes = [...indexes, `[${index}]`];
+            if (item?.id === id) {
+                nodeChain = indexes;
+                globalItem = item;
+                return true;
+            }
+            if (item.commands)
+                item.commands.some((item: any, index: any) =>
+                    searchIdItem(item, index, [...indexes, `['commands']`])
+                );
+
+        };
+        commandsFromStore.some((item, index) => searchIdItem(item, index));
+        return { nodeChain, item: globalItem };
+    }
+
     context.subscriptions.push(
         vscode.commands.registerCommand(`${PLUGIN_NAME}.openFile`, (args) => {
             openFile(args);
         }),
-        vscode.commands.registerCommand(`${PLUGIN_NAME}.openFolder`, (args) => {}),
+        vscode.commands.registerCommand(`${PLUGIN_NAME}.openFolder`, (args) => { }),
+
         vscode.commands.registerCommand(`${PLUGIN_NAME}.run`, (args) => {
-            runProgram(args[0]);
+            console.log('args', args);
+            runProgram(args);
         }),
+
         vscode.commands.registerCommand(`${PLUGIN_NAME}.runCommand`, (args) => {
             runCommand(args);
         }),

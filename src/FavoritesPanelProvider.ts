@@ -1,12 +1,12 @@
 import * as vscode from 'vscode';
-import {getCommandsForTree} from './extension';
-import {TreeItem} from './TreeItem';
+import { getCommandsForTree } from './extension';
+import { TreeItem } from './TreeItem';
 
 // Tree View
 export class FavoritesPanelProvider implements vscode.TreeDataProvider<TreeItem> {
     private _onDidChangeTreeData: vscode.EventEmitter<TreeItem | undefined | void> = new vscode.EventEmitter<TreeItem | undefined | void>();
     readonly onDidChangeTreeData: vscode.Event<TreeItem | undefined | void> = this._onDidChangeTreeData.event;
-    constructor(private commands: any, private context: vscode.ExtensionContext) {}
+    constructor(private commands: any, private context: vscode.ExtensionContext) { }
 
     refresh(): void {
         this.commands = getCommandsForTree(this.context);
@@ -14,7 +14,7 @@ export class FavoritesPanelProvider implements vscode.TreeDataProvider<TreeItem>
     }
 
     getTreeItem(element: TreeItem): vscode.TreeItem | Thenable<TreeItem> {
-        console.log(element.command);
+        console.log('element.command', element.command);
         return element;
     }
 
