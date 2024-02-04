@@ -364,11 +364,12 @@ export async function activate(context: vscode.ExtensionContext) {
             size: commandsFromStore.length
         }] : [];
 
-        const pickedCommand = await vscode.window.showQuickPick([...baseRootItem, ...roots.map(({ description, path, chain, size }: any, key) => ({
-            label: path,
+        const pickedCommand = await vscode.window.showQuickPick([...baseRootItem, ...roots.map(({ chain, size, ...item }: any, key) => ({
+            label: item.path,
             key,
-            description: `${chain.join('')}: ${description}`,
-            // description: `${JSON.stringify(indexes)} : ${description}`,
+            // description: `${chain.join('')}: ${description}`,
+            // description: `${JSON.stringify(item.indexes)} : ${item.description}`,
+            description: `${item.description}`,
             chain,
             size
         }))], {
