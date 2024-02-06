@@ -385,6 +385,8 @@ export async function activate(context: vscode.ExtensionContext) {
             title: `Select the new location:`,
         });
 
+        if (!pickedCommand) return;
+
         const tempData = commandsFromStore;
         const tempStoreName = Object.keys({ tempData }).pop();
 
