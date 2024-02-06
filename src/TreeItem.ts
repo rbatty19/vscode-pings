@@ -1,37 +1,63 @@
 import * as vscode from 'vscode';
-import { generate } from 'short-uuid';
+import * as fs from 'fs';
+import * as shortUUID from 'short-uuid';
 
 export class TreeItem extends vscode.TreeItem {
     children: TreeItem[] | undefined;
+    customColors: string[] = [];
 
     constructor(label: string, children?: TreeItem[], extra?: TreeItem | any) {
         super(label, children === undefined ? vscode.TreeItemCollapsibleState.None : vscode.TreeItemCollapsibleState.Expanded);
         this.children = children;
-
         this.description = extra?.description;
         this.tooltip = extra?.description;
         this.contextValue = extra?.contextValue ?? '';
-        this.id = extra?.id ?? generate();
+        this.id = extra?.id ?? shortUUID.generate();
         if (extra?.command) this.command = extra?.command;
         if (extra?.fsPath) this.resourceUri = vscode.Uri.file(extra?.fsPath);
-        // else this.iconPath = extra?.iconPath;
-        if (extra?.iconData) this.iconPath = this.#handleIconPath(extra?.iconData, extra['item.command']);
-        // vscode.extensions.getExtension()
-        // Object.assign(this.extras, { id: extra?.id });
-        // this.resourceUri = vscode.extensions.getExtension('PKief.material-icon-theme')?.extensionUri; //vscode.workspace.getConfiguration().inspect('workbench.iconTheme')?.globalValue
+        if (extra?.iconData) this.iconPath = extra?.iconData;
     }
 
-    #handleIconPath({ id, color }: { id?: string, color?: string }, command?: string): any {
 
-        // const getConfig = (section?: string) => {
-        //     return vscode.workspace.getConfiguration(section);
-        // };
+    static async handleIconPath({ id, color }: { id?: string, color?: string }, command?: string): Promise<any> {
 
-        // const themeColorValue = () => {
-        //     return getConfig().inspect('workbench.colorTheme')?.globalValue ?? getConfig().inspect('workbench.colorTheme')?.workspaceValue;
-        // };
+        let colorId;
+        const getConfig = (section?: string) => {
+            return vscode.workspace.getConfiguration(section);
+        };
+
+        const themeColorValue = () => {
+            return getConfig().inspect('workbench.colorTheme')?.globalValue ?? getConfig().inspect('workbench.colorTheme')?.workspaceValue;
+        };
 
         // const a1 = getConfig('workbench.colorTheme').get<string>('colorTheme');
+        // const colorTheme = vscode.workspace.getConfiguration('workbench').get<string>('colorTheme') ?? 'Default Dark';
+        // const themeElement: any = {};
+
+        // const colorThemes: any[] = vscode.extensions.all
+        //     .filter(extension => extension.packageJSON.contributes?.themes && extension.packageJSON.contributes?.themes.some((theme: any) => {
+        //         if (theme.id === colorTheme) Object.assign(themeElement, theme);
+        //         return theme.id === colorTheme;
+        //     }));
+        // .filter(extension => extension.packageJSON.contributes?.themes.some())
+        // .map(extension => extension?.isActive());
+
+        // const bracketHighlightColor = vscode.workspace
+        //     .getConfiguration().get<string>('editorBracketHighlight.foreground4');
+
+        // const data1 = vscode.Uri.joinPath(colorThemes[0].extensionUri, themeElement.path);
+
+        // const data2 = JSON.parse(fs.readFileSync(data1.path, 'utf8'));
+
+        if (color) {
+            const existingColorCustomizations = getConfig().inspect('workbench.colorCustomizations')?.workspaceValue || getConfig().inspect('workbench.colorCustomizations')?.globalValue || {};
+
+            colorId = `my.newcolor-${color.split('#').pop()}`;
+            await getConfig().update('workbench.colorCustomizations', {
+                ...existingColorCustomizations,
+                [colorId]: color
+            }, vscode.ConfigurationTarget.Workspace);
+        }
 
         const themeIcon = (id: string, color?: vscode.ThemeColor): vscode.ThemeIcon => color
             ? new vscode.ThemeIcon(id, color)
@@ -55,9 +81,10 @@ export class TreeItem extends vscode.TreeItem {
             }
         };
 
-        let colorObj: any = new vscode.ThemeColor(color ?? '');
-        // if (!colorObj?.id) return (id && themeIcon(id)) || getIcon(command);
+        // let colorObj: any = new vscode.ThemeColor(color ?? '');
+        let colorObj: any = new vscode.ThemeColor(colorId ?? '');
+        if (colorId) return (id && themeIcon(id, colorObj)) || getIcon(command, colorObj);
 
-        return (id && themeIcon(id, colorObj)) || getIcon(command);
+        return (id && themeIcon(id)) || getIcon(command);
     }
 }
