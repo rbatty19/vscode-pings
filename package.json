@@ -80,6 +80,12 @@
                     "group": "pings-extension"
                 }
             ],
+            "editor/title/context": [
+                {
+                    "command": "pings.AddFileToGlobalStore",
+                    "group": "pings-extension"
+                }
+            ],
             "view/item/context": [
                 {
                     "command": "pings.openFolderInWindow",
@@ -169,7 +175,7 @@
             },
             {
                 "command": "pings.AddFileToGlobalStore",
-                "title": "Add file to global store (pings)",
+                "title": "Pings: Add file to global store",
                 "icon": "$(folder-opened)"
             }
         ],

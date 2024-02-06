@@ -14,7 +14,7 @@ export class TreeItem extends vscode.TreeItem {
         this.contextValue = extra?.contextValue ?? '';
         this.id = extra?.id ?? shortUUID.generate();
         if (extra?.command) this.command = extra?.command;
-        if (extra?.fsPath) this.resourceUri = vscode.Uri.file(extra?.fsPath);
+        if (extra?.customIconReference) this.resourceUri = vscode.Uri.file(extra?.customIconReference);
         if (extra?.iconData) this.iconPath = extra?.iconData;
     }
 
@@ -26,9 +26,9 @@ export class TreeItem extends vscode.TreeItem {
             return vscode.workspace.getConfiguration(section);
         };
 
-        const themeColorValue = () => {
-            return getConfig().inspect('workbench.colorTheme')?.globalValue ?? getConfig().inspect('workbench.colorTheme')?.workspaceValue;
-        };
+        // const themeColorValue = () => {
+        //     return getConfig().inspect('workbench.colorTheme')?.globalValue ?? getConfig().inspect('workbench.colorTheme')?.workspaceValue;
+        // };
 
         // const a1 = getConfig('workbench.colorTheme').get<string>('colorTheme');
         // const colorTheme = vscode.workspace.getConfiguration('workbench').get<string>('colorTheme') ?? 'Default Dark';

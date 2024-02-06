@@ -71,33 +71,33 @@ const getIcon = (item: any, color?: string) => {
 
 // Get command from item of settings
 const getCommand = (item: ICommandWithSequence) => {
-    if (item.sequence) {
-        return getSequence(item);
-    }
+    // if (item.sequence) {
+    //     return getSequence(item);
+    // }
 
-    const argsByCommand: Record<string, unknown> = {
-        openFolder: item?.path,
-        openFile: [item?.path],
-    };
+    // const argsByCommand: Record<string, unknown> = {
+    //     openFolder: item?.path,
+    //     openFile: [item?.path],
+    // };
 
-    const iconData = item.icon || item.iconColor ? { iconData: { id: item.icon, color: item.iconColor } } : {};
+    // const iconData = item.icon || item.iconColor ? { id: item.icon, color: item.iconColor } : {};
 
-    return new TreeItem(
-        item.label,
-        // scheme === 'folder' ? [] : undefined,
-        undefined,
-        {
-            ...iconData,
-            description: item.description,
-            fsPath: item?.path,
-            command: {
-                command: `${PLUGIN_NAME}.${item.command}`,
-                arguments: argsByCommand[`${item!.command}`] ?? [item.arguments],
-            },
-            contextValue: item.command,
-            id: item?.id ?? shortUUID.generate()
-        }
-    );
+    // return new TreeItem(
+    //     item.label,
+    //     // scheme === 'folder' ? [] : undefined,
+    //     undefined,
+    //     {
+    //         iconData,
+    //         description: item.description,
+    //         fsPath: item?.path,
+    //         command: {
+    //             command: `${PLUGIN_NAME}.${item.command}`,
+    //             arguments: argsByCommand[`${item!.command}`] ?? [item.arguments],
+    //         },
+    //         contextValue: item.command,
+    //         id: item?.id ?? shortUUID.generate()
+    //     }
+    // );
 };
 
 // Get Sequence from item of settings
@@ -205,6 +205,9 @@ async function itemRender(item: any) {
 
     const { label, commands, icon, iconColor, description, id, path } = item;
 
+    const isCustomIcon = item && item.hasOwnProperty('fake_resoure_icon_ref');
+    const customIconReference = item?.fake_resoure_icon_ref;
+
     const argsByCommand: Record<string, unknown> = {
         openFolder: path,
         openFile: [path],
@@ -216,20 +219,17 @@ async function itemRender(item: any) {
         },
     } : {};
 
-    const iconData = item.icon || item.iconColor ? { iconData: await TreeItem.handleIconPath({ id: icon, color: iconColor }, item.command) } : {};
-
-
     return new TreeItem(
         label,
         item.commands ? await itemArrayRender(commands) : undefined,
         {
-            ...iconData,
+            iconData: await TreeItem.handleIconPath({ id: icon, color: iconColor }, item.command),
             ...command,
             description,
             ['item.command']: item.command,
             contextValue: item.command,
             id,
-            fsPath: path,
+            customIconReference: isCustomIcon ? customIconReference : path,
         }
     );
 
@@ -268,6 +268,7 @@ async function checkGlobalStoreFile(storeUri: vscode.Uri) {
     });
 }
 
+
 // Commands activations/
 export async function activate(context: vscode.ExtensionContext) {
 
@@ -275,6 +276,11 @@ export async function activate(context: vscode.ExtensionContext) {
     vscode.workspace.fs.createDirectory(globalStorageUri);
     const storeUri = vscode.Uri.joinPath(globalStorageUri, 'ping.setting.jsonc'); // TODO store the storeUri in some higher scope
     await checkGlobalStoreFile(storeUri);
+
+    fs.watchFile(storeUri.path, (curr, prev) => {
+        if (curr.mtime !== prev.mtime)
+            vscode.commands.executeCommand(`${PLUGIN_NAME}.refreshPanel`);
+    });
 
     const pingsPanelProvider = new PingsPanelProvider(getCommandsForTree(context), context);
 
@@ -315,15 +321,9 @@ export async function activate(context: vscode.ExtensionContext) {
         vscode.commands.executeCommand(`${PLUGIN_NAME}.refreshPanel`);
         vscode.commands.executeCommand(`${PLUGIN_NAME}.focus`);
 
-        vscode.window.showInformationMessage(`running AddFileToGlobalStore ${JSON.stringify({ pathFile })}`);
     });
 
     vscode.commands.registerCommand(`${PLUGIN_NAME}.MoveItemToGroup`, async (item) => {
-
-        // if (!item?.id) {
-        //     vscode.window.showWarningMessage(`This Item doesn't have "id"`);
-        //     return;
-        // }
 
         const { nodeChain: currentItemChain, item: itemToMove } = buildNodeChainById(item?.id);
 
@@ -331,10 +331,6 @@ export async function activate(context: vscode.ExtensionContext) {
             vscode.window.showWarningMessage(`This Item doesn't have "id" or chain`);
             return;
         }
-
-        const parentChain = (currentItemChain.length > 2)
-            ? [...currentItemChain].slice(0, currentItemChain.length - 1)
-            : [];
 
         const commandsFromStore = getCommandsFromFile(store.globalStorageFilePath);
 
@@ -344,7 +340,6 @@ export async function activate(context: vscode.ExtensionContext) {
             const { label, commands, description } = item;
             const currentRoot: any = [...root, label];
             if ((item.commands || item.command === 'openFolder')
-                // && (extra.chain.join('') !== parentChain!.join(''))
                 && (extra.chain.join('') !== `${currentItemChain.join('')}['commands']`)
             ) {
                 roots.push({
@@ -383,8 +378,6 @@ export async function activate(context: vscode.ExtensionContext) {
         const pickedCommand = await vscode.window.showQuickPick([...baseRootItem, ...roots.map(({ chain, size, ...item }: any, key) => ({
             label: item.path,
             key,
-            // description: `${chain.join('')}: ${description}`,
-            // description: `${JSON.stringify(item.indexes)} : ${item.description}`,
             description: `${item.description}`,
             chain,
             size
@@ -431,8 +424,6 @@ export async function activate(context: vscode.ExtensionContext) {
         vscode.commands.executeCommand(`${PLUGIN_NAME}.refreshPanel`);
     });
 
-
-
     context.subscriptions.push(
         vscode.commands.registerCommand(`${PLUGIN_NAME}.openFile`, (args) => {
             openFile(args);
@@ -460,7 +451,6 @@ export async function activate(context: vscode.ExtensionContext) {
             openFolder(args, true)
         )
     );
-
 
     // // Open demo file of settings
     // if (!store.commands.length) {
