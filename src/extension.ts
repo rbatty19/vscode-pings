@@ -44,21 +44,20 @@ const checkFileOrFolder = (pathFile: any) => {
 };
 
 // get Icon
-const getIcon = (item: any, color: string) => {
-    const themeColor = new vscode.ThemeColor(color ?? '');
+const getIcon = (item: any, color?: string) => {
     switch (item.command) {
         case 'openFile':
             return vscode.ThemeIcon.File;
         case 'openFolder':
             return vscode.ThemeIcon.Folder;
         case 'run':
-            return new vscode.ThemeIcon('console', themeColor);
+            return new vscode.ThemeIcon('console');
         case 'runCommand':
-            return new vscode.ThemeIcon('run', themeColor);
+            return new vscode.ThemeIcon('run');
         case 'insertNewCode':
-            return new vscode.ThemeIcon('find-replace', themeColor);
+            return new vscode.ThemeIcon('find-replace');
         default:
-            return new vscode.ThemeIcon('open-editors-view-icon', themeColor);
+            return new vscode.ThemeIcon('open-editors-view-icon');
     }
 };
 
@@ -73,22 +72,14 @@ const getCommand = (item: ICommandWithSequence) => {
         openFile: [item?.path],
     };
 
-    const { scheme } = checkFileOrFolder({ fsPath: item?.path });
+    const iconData = item.icon || item.iconColor ? { iconData: { id: item.icon, color: item.iconColor } } : {};
 
-    const iconPathRaw = (item?.icon && new vscode.ThemeIcon(
-        item.icon,
-        new vscode.ThemeColor(item.iconColor ?? '')
-    )) || getIcon(item, item.iconColor ?? '');
-
-    const iconPath = item.icon ? { iconPath: iconPathRaw } : {};
-
-    // console.log('item:', JSON.stringify(item, null, 2)); // TODO 123
     return new TreeItem(
         item.label,
         // scheme === 'folder' ? [] : undefined,
         undefined,
         {
-            ...iconPath,
+            ...iconData,
             description: item.description,
             fsPath: item?.path,
             command: {
@@ -205,39 +196,37 @@ export const getCommandsForTree = async (context: vscode.ExtensionContext) => {
 };
 
 function itemRender(item: any) {
-    if (item.commands) {
-        const { label, commands, icon, iconColor, description, id, path } = item;
-        const currentCommand: any = getCommand(item);
 
+    const { label, commands, icon, iconColor, description, id, path } = item;
 
-        const argsByCommand: Record<string, unknown> = {
-            openFolder: item?.path,
-            openFile: [item?.path],
-        };
-        const command = item?.command ? {
-            command: {
-                command: `${PLUGIN_NAME}.${item.command}`,
-                arguments: argsByCommand[`${item!.command}`] ?? [item.arguments],
-            },
-        } : {};
+    const argsByCommand: Record<string, unknown> = {
+        openFolder: path,
+        openFile: [path],
+    };
+    const command = item?.command ? {
+        command: {
+            command: `${PLUGIN_NAME}.${item.command}`,
+            arguments: argsByCommand[`${item!.command}`] ?? [item.arguments],
+        },
+    } : {};
 
-        return new TreeItem(
-            label,
-            commands.map((subItem: any) => itemRender(subItem)),
-            {
-                iconPath: (
-                    icon && new vscode.ThemeIcon(icon, new vscode.ThemeColor(iconColor ?? ''))
-                ) || getIcon(item, iconColor ?? ''),
-                // ...{ iconPath },
-                ...command,
-                description,
-                contextValue: currentCommand.contextValue,
-                id,
-                fsPath: path,
-            }
-        );
-    }
-    return getCommand(item);
+    const iconData = item.icon || item.iconColor ? { iconData: { id: icon, color: iconColor } } : {};
+
+    return new TreeItem(
+        label,
+        item.commands ? commands.map((subItem: any) => itemRender(subItem)) : undefined,
+        {
+            ...iconData,
+            ...command,
+            description,
+            ['item.command']: item.command,
+            contextValue: item.command,
+            id,
+            fsPath: path,
+        }
+    );
+
+    // return getCommand(item);
 }
 
 async function checkGlobalStoreFile(storeUri: vscode.Uri) {
