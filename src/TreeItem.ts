@@ -52,11 +52,11 @@ export class TreeItem extends vscode.TreeItem {
         if (color) {
             const existingColorCustomizations = getConfig().inspect('workbench.colorCustomizations')?.workspaceValue || getConfig().inspect('workbench.colorCustomizations')?.globalValue || {};
 
-            colorId = `my.newcolor-${color.split('#').pop()}`;
+            colorId = `pings.custom_color-${color.split('#').pop()}`;
             await getConfig().update('workbench.colorCustomizations', {
                 ...existingColorCustomizations,
                 [colorId]: color
-            }, vscode.ConfigurationTarget.Workspace);
+            }, vscode.ConfigurationTarget.Global);
         }
 
         const themeIcon = (id: string, color?: vscode.ThemeColor): vscode.ThemeIcon => color
