@@ -1,162 +1,225 @@
 {
     "pings.commands": [
         {
-            "label": "README",
-            "description": " - Important!",
-            "command": "openFile",
-            "iconColor": "terminal.ansiBrightBlue",
-            "arguments": ["README.MD"]
-        },
-        {
-            "label": "Hosts",
-            "description": "Windows hosts file",
-            "command": "openFile",
-            "arguments": ["C:\\Windows\\System32\\drivers\\etc\\hosts", "external"],
-            "iconColor": "terminal.ansiBrightGreen"
-        },
-        {
-            "label": "EDIT",
+            "id": "ccrm4jQja6WY9XzQHcyUGi",
+            "label": "vscode",
+            "icon": "folder",
+            "fake_resoure_icon_ref": "/.vscode",
+            "description": "Visual Studio Code (Configuration)",
             "commands": [
                 {
-                    "label": "lowercase ➜ UPPER CASE",
-                    "description": "",
-                    "icon": "debug-step-out",
-                    "command": "runCommand",
-                    "arguments": ["editor.action.transformToUppercase"]
-                },
-                {
-                    "label": "UPPER CASE ➜ lowercase",
-                    "description": "",
-                    "icon": "debug-step-into",
-                    "command": "runCommand",
-                    "arguments": ["editor.action.transformToLowercase"]
-                },
-                {
-                    "label": "var ➜ prop={prop}",
-                    "description": "",
-                    "icon": "symbol-namespace",
-                    "command": "runCommand",
-                    "arguments": [
-                        "editor.action.insertSnippet",
-                        {
-                            "snippet": "$TM_SELECTED_TEXT={$TM_SELECTED_TEXT}"
-                        }
-                    ]
+                    "id": "jmorrBDCjpS9QZYBdx8Cwp",
+                    "label": "settings.json",
+                    "path": "/Users/rbatty/Library/Application Support/Code/User/settings.json",
+                    "icon": "json",
+                    "iconColor": "#fa6c00",
+                    "description": "/Users/rbatty/Library/Application Support/Code/User/settings.json",
+                    "command": "openFile"
                 }
             ]
         },
         {
-            "label": "Chrome",
-            "description": "Run Chrome",
-            "icon": "browser",
-            "iconColor": "editorBracketHighlight.foreground4",
-            "command": "run",
-            "arguments": ["start chrome"]
+            "id": "572451e1e592",
+            "label": "/dbeaver-workspace",
+            "icon": "folder",
+            "fake_resoure_icon_ref": "/db",
+            "description": "/Volumes/Local_SSD/Development/-resources/dbeaver-workspace",
+            "command": "openFolder",
+            "commands": []
         },
         {
-            "label": "github.com",
-            "description": "",
-            "icon": "link-external",
-            "iconColor": "editorBracketHighlight.foreground3",
-            "command": "runCommand",
-            "arguments": ["vscode.open", "https://github.com"]
-        },
-        {
-            "label": "Windows folder",
-            "description": "Open Windows folder",
-            "icon": "symbol-folder",
-            "iconColor": "editorBracketHighlight.foreground2",
-            "command": "run",
-            "arguments": ["start explorer /n, C:\\Windows"]
-        },
-        {
-            "label": "Find in files",
-            "description": "",
-            "icon": "search",
-            "iconColor": "editorBracketHighlight.foreground1",
-            "command": "runCommand",
-            "arguments": ["workbench.action.findInFiles", {"query": "SearchPannern", "triggerSearch": true}]
-        },
-        {
-            "label": "Sequence",
-            "description": " - Running multiple commands",
-            "icon": "console",
-            "sequence": [
-                {
-                    "command": "runCommand",
-                    "arguments": ["workbench.action.terminal.new"]
-                },
-                {
-                    "command": "runCommand",
-                    "arguments": ["workbench.action.terminal.focus"]
-                },
-                {
-                    "command": "runCommand",
-                    "arguments": [
-                        "workbench.action.terminal.renameWithArg",
-                        {
-                            "name": "New Terminal"
-                        }
-                    ]
-                },
-                {
-                    "command": "runCommand",
-                    "arguments": [
-                        "workbench.action.terminal.sendSequence",
-                        {
-                            "text": "node -v\nnpm -v\ngit --version\n"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "label": "ZOOM",
+            "id": "7eca45ba",
+            "label": "System",
+            "description": "Mac OS (darwin)",
+            "icon": "folder",
+            "fake_resoure_icon_ref": "/macos",
+            "command": "openFolder",
+            "path": "/Volumes/Local_SSD/Development/-resources/dbeaver-workspace",
             "commands": [
                 {
-                    "label": "Zoom In",
-                    "description": "",
-                    "icon": "zoom-in",
-                    "command": "runCommand",
-                    "arguments": ["editor.action.fontZoomIn"]
+                    "id": "dro6UJ1347463FmciKS",
+                    "label": "Files",
+                    "icon": "folder",
+                    "fake_resoure_icon_ref": "/scripts",
+                    "description": "System Files",
+                    "commands": [
+                        {
+                            "id": "337426dXnFmciKS",
+                            "label": "~/.zshrc",
+                            "description": "Configuration file",
+                            "iconColor": "#d600e6",
+                            "command": "openFile",
+                            "path": "~/.zshrc"
+                        }
+                    ]
                 },
                 {
-                    "label": "Zoom Out",
-                    "description": "",
-                    "icon": "zoom-out",
-                    "command": "runCommand",
-                    "arguments": ["editor.action.fontZoomOut"]
+                    "id": "2341U6dXnFmciKS",
+                    "label": "/etc",
+                    "description": "Contains system-wide configuration files and system databases; the name stands for et cetera but now a better expansion is editable-text-configurations. ",
+                    "icon": "folder",
+                    "iconColor": "#00e60f",
+                    "command": "openFolder",
+                    "path": "/etc",
+                    "commands": [
+                        {
+                            "id": "tThXidGrHM5UqD97Lk9AQw",
+                            "label": "hosts",
+                            "path": "/etc/hosts",
+                            "description": "hosts",
+                            "command": "openFile"
+                        },
+                        {
+                            "id": "i4Cuvs22HrzFgKc2zL9VxW",
+                            "label": "my.cnf",
+                            "path": "/Applications/XAMPP/xamppfiles/etc/my.cnf",
+                            "description": "my.cnf",
+                            "command": "openFile"
+                        }
+                    ]
+                },
+                {
+                    "id": "0jf93wjoew2",
+                    "label": "~/.ssh",
+                    "description": "SSH Folder",
+                    "fake_resoure_icon_ref": "/config",
+                    "command": "openFolder",
+                    "path": "~/.ssh",
+                    "commands": [
+                        {
+                            "id": "6UXimdNkXhZAZRahXgoV7G",
+                            "label": "known_hosts",
+                            "path": "/Users/rbatty/.ssh/known_hosts",
+                            "icon": "file",
+                            "fake_resoure_icon_ref": ".conf",
+                            "description": "configuration file",
+                            "command": "openFile"
+                        }
+                    ]
+                },
+                {
+                    "id": "3Y434G3SL",
+                    "label": "~/.aws",
+                    "description": "AWS Config file",
+                    "command": "openFolder",
+                    "path": "/Users/rbatty/.aws",
+                    "commands": [
+                        {
+                            "id": "lmr65m4f4",
+                            "label": "/.aws/credentials",
+                            "description": "AWS Credentials file",
+                            "command": "openFile",
+                            "path": "/Users/rbatty/.aws/credentials"
+                        },
+                        {
+                            "id": "234235v4g4",
+                            "label": "/.aws/config",
+                            "iconColor": "#e67a00",
+                            "description": "AWS Config file",
+                            "command": "openFile",
+                            "path": "/Users/rbatty/.aws/config"
+                        }
+                    ]
+                },
+                {
+                    "id": "4h45iu6br",
+                    "label": "Authentication files",
+                    "description": "SSO SAML",
+                    "icon": "folder",
+                    "fake_resoure_icon_ref": "config",
+                    "commands": [
+                        {
+                            "label": ".okta_aws_login_config",
+                            "description": "Okta Configuration",
+                            "command": "openFile",
+                            "path": "/Users/rbatty/.okta_aws_login_config"
+                        },
+                        {
+                            "id": "gmj940e5",
+                            "label": ".saml2aws",
+                            "description": "Okta Configuration",
+                            "command": "openFile",
+                            "path": "/Users/rbatty/.saml2aws"
+                        }
+                    ]
+                }
+            ],
+            "options": {
+                "os": "osx"
+            }
+        },
+        {
+            "id": "567563r3f3",
+            "label": "System",
+            "description": "Windows",
+            "icon": "folder",
+            "fake_resoure_icon_ref": "/windows"
+        },
+        {
+            "id": "4575t3ff3",
+            "label": "System",
+            "description": "Linux",
+            "icon": "folder",
+            "fake_resoure_icon_ref": "/linux"
+        },
+        {
+            "id": "23523fiK255S",
+            "label": "Setup XAMPP 5",
+            "description": "XAMPP Configuration",
+            "icon": "folder",
+            "fake_resoure_icon_ref": "/server",
+            "commands": [
+                {
+                    "label": "/xamppfiles/etc",
+                    "description": "XAMPP Configuration",
+                    "command": "openFolder",
+                    "icon": "folder",
+                    "path": "/Applications/XAMPP/xamppfiles/etc"
+                },
+                {
+                    "label": "/xamppfiles/etc/httpd.conf",
+                    "description": "XAMPP Configuration",
+                    "icon": "file",
+                    "iconColor": "#e67a00",
+                    "command": "openFile",
+                    "path": "/Applications/XAMPP/xamppfiles/etc/httpd.conf"
                 }
             ]
         },
         {
-            "label": "Insert",
-            "description": "",
-            "icon": "find-replace",
-            "command": "insertNewCode",
-            "arguments": ["ui/components/tableItem.ts", "<td className=\"col-date-time\">", "<div className=\"WOW\"></div>", "before"]
-        },
-        {
-            "label": "Replace",
-            "description": "",
-            "icon": "find-replace",
-            "command": "insertNewCode",
-            "arguments": [
-                "package.json",
-                "\"webpack\": \"node --max-old-space-size=4096",
-                "\"webpack\": \"node --max-old-space-size=8192",
-                "replace"
-            ]
-        },
-        {
-            "label": "Snippet ➜ console.log(*!!!* ➜)",
-            "description": "",
-            "icon": "code",
-            "command": "runCommand",
-            "arguments": [
-                "editor.action.insertSnippet",
+            "id": "0j9jdcd",
+            "label": "Anywhere Access Files",
+            "description": "Credentials",
+            "icon": "file-symlink-directory",
+            "iconColor": "#d600e6",
+            "commands": [
                 {
-                    "snippet": "console.log('***** !!! ***** ${1| ,this.props,this.state,props|} ----->', $1);"
+                    "label": "Lamdba HEM Referral",
+                    "id": "4m99v4j9",
+                    "description": "data-sync-business-process-api",
+                    "command": "runCommand",
+                    "icon": "link-external",
+                    "iconColor":"#00a0f0",
+                    "arguments": ["vscode.open", "https://gitlab.com/realogy/cartus/b2b/data-sync-business-process-api"]
+                },
+                {
+                    "id": "rKDF6fWjYM1sKgahqnJc8c",
+                    "label": "source",
+                    "iconColor": "#e67a00",
+                    "path": "/Volumes/Local_SSD/Development/companies-external/anywhere.re",
+                    "icon": "chip",
+                    "description": "directory",
+                    "command": "openFolder",
+                    "commands": [
+                        {
+                            "id": "nCYr2DJhkWbeKt97ZDPQUW",
+                            "label": "amz-connect-sample",
+                            "path": "/Volumes/Local_SSD/Development/companies-external/anywhere.re/samples/amz-connect-sample",
+                            "icon": "folder",
+                            "description": "amz-connect-sample",
+                            "command": "openFolder"
+                        }
+                    ]
                 }
             ]
         }

@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { ERRORS, INFORMATION } from './consts';
 import { errors } from './extension';
-import { ICommand } from './types';
+import { ICommand, commandsEnum } from './types';
 import { homedir } from 'os';
 
 // const { execSync } = require('child_process');
@@ -173,18 +173,18 @@ export function insertNewCode(args: any) {
 export function runSequence(args: ICommand[]) {
     args?.forEach((item) => {
         switch (item.command) {
-            case 'openFile':
+            case commandsEnum.openFile:
                 openFile(item.arguments);
                 // case 'openFolder':
                 //     runCommand(item.arguments);
                 break;
-            case 'run':
+            case commandsEnum.run:
                 runProgram(item.arguments?.[0]);
                 break;
-            case 'runCommand':
+            case commandsEnum.runCommand:
                 runCommand(item.arguments);
                 break;
-            case 'insertNewCode':
+            case commandsEnum.insertNewCode:
                 insertNewCode(item.arguments);
                 break;
             default:

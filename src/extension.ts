@@ -5,7 +5,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as shortUUID from 'short-uuid';
 import { PLUGIN_NAME } from './consts';
-import { ICommandWithSequence, IStore, TCommand } from './types';
+import { ICommandWithSequence, IStore, TCommand, commandType, commandsEnum } from './types';
 import { PingsPanelProvider } from './PingsPanelProvider';
 import { TreeItem } from './TreeItem';
 import { insertNewCode, openFile, openFolder, runCommand, runProgram, runSequence } from './commands';
@@ -53,16 +53,16 @@ const itemArrayRender: any = async (commands: any) => {
 
 // get Icon
 const getIcon = (item: any, color?: string) => {
-    switch (item.command) {
-        case 'openFile':
+    switch (item.command as commandType) {
+        case commandsEnum.openFile:
             return vscode.ThemeIcon.File;
-        case 'openFolder':
+        case commandsEnum.openFolder:
             return vscode.ThemeIcon.Folder;
-        case 'run':
+        case commandsEnum.run:
             return new vscode.ThemeIcon('console');
-        case 'runCommand':
+        case commandsEnum.runCommand:
             return new vscode.ThemeIcon('run');
-        case 'insertNewCode':
+        case commandsEnum.insertNewCode:
             return new vscode.ThemeIcon('find-replace');
         default:
             return new vscode.ThemeIcon('open-editors-view-icon');
@@ -314,7 +314,7 @@ export async function activate(context: vscode.ExtensionContext) {
                 path: uri,
                 icon: scheme === 'folder' ? 'folder' : 'file',
                 description: uri,
-                command: scheme === 'folder' ? 'openFolder' : 'openFile',
+                command: scheme === 'folder' ? commandsEnum.openFolder : commandsEnum.openFile,
             }
         });
 
@@ -339,7 +339,7 @@ export async function activate(context: vscode.ExtensionContext) {
         function rootAnalyzer(item: any, root: string[] = [], extra: any) {
             const { label, commands, description } = item;
             const currentRoot: any = [...root, label];
-            if ((item.commands || item.command === 'openFolder')
+            if ((item.commands || item.command === commandsEnum.openFolder)
                 && (extra.chain.join('') !== `${currentItemChain.join('')}['commands']`)
             ) {
                 roots.push({

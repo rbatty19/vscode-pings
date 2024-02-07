@@ -1,0 +1,164 @@
+{
+    "pings.commands": [
+        {
+            "label": "README",
+            "description": " - Important!",
+            "command": "openFile",
+            "iconColor": "terminal.ansiBrightBlue",
+            "arguments": ["README.MD"]
+        },
+        {
+            "label": "Hosts",
+            "description": "Windows hosts file",
+            "command": "openFile",
+            "arguments": ["C:\\Windows\\System32\\drivers\\etc\\hosts", "external"],
+            "iconColor": "terminal.ansiBrightGreen"
+        },
+        {
+            "label": "EDIT",
+            "commands": [
+                {
+                    "label": "lowercase ➜ UPPER CASE",
+                    "description": "",
+                    "icon": "debug-step-out",
+                    "command": "runCommand",
+                    "arguments": ["editor.action.transformToUppercase"]
+                },
+                {
+                    "label": "UPPER CASE ➜ lowercase",
+                    "description": "",
+                    "icon": "debug-step-into",
+                    "command": "runCommand",
+                    "arguments": ["editor.action.transformToLowercase"]
+                },
+                {
+                    "label": "var ➜ prop={prop}",
+                    "description": "",
+                    "icon": "symbol-namespace",
+                    "command": "runCommand",
+                    "arguments": [
+                        "editor.action.insertSnippet",
+                        {
+                            "snippet": "$TM_SELECTED_TEXT={$TM_SELECTED_TEXT}"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "label": "Chrome",
+            "description": "Run Chrome",
+            "icon": "browser",
+            "iconColor": "editorBracketHighlight.foreground4",
+            "command": "run",
+            "arguments": ["start chrome"]
+        },
+        {
+            "label": "github.com",
+            "description": "",
+            "icon": "link-external",
+            "iconColor": "editorBracketHighlight.foreground3",
+            "command": "runCommand",
+            "arguments": ["vscode.open", "https://github.com"]
+        },
+        {
+            "label": "Windows folder",
+            "description": "Open Windows folder",
+            "icon": "symbol-folder",
+            "iconColor": "editorBracketHighlight.foreground2",
+            "command": "run",
+            "arguments": ["start explorer /n, C:\\Windows"]
+        },
+        {
+            "label": "Find in files",
+            "description": "",
+            "icon": "search",
+            "iconColor": "editorBracketHighlight.foreground1",
+            "command": "runCommand",
+            "arguments": ["workbench.action.findInFiles", {"query": "SearchPannern", "triggerSearch": true}]
+        },
+        {
+            "label": "Sequence",
+            "description": " - Running multiple commands",
+            "icon": "console",
+            "sequence": [
+                {
+                    "command": "runCommand",
+                    "arguments": ["workbench.action.terminal.new"]
+                },
+                {
+                    "command": "runCommand",
+                    "arguments": ["workbench.action.terminal.focus"]
+                },
+                {
+                    "command": "runCommand",
+                    "arguments": [
+                        "workbench.action.terminal.renameWithArg",
+                        {
+                            "name": "New Terminal"
+                        }
+                    ]
+                },
+                {
+                    "command": "runCommand",
+                    "arguments": [
+                        "workbench.action.terminal.sendSequence",
+                        {
+                            "text": "node -v\nnpm -v\ngit --version\n"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "label": "ZOOM",
+            "commands": [
+                {
+                    "label": "Zoom In",
+                    "description": "",
+                    "icon": "zoom-in",
+                    "command": "runCommand",
+                    "arguments": ["editor.action.fontZoomIn"]
+                },
+                {
+                    "label": "Zoom Out",
+                    "description": "",
+                    "icon": "zoom-out",
+                    "command": "runCommand",
+                    "arguments": ["editor.action.fontZoomOut"]
+                }
+            ]
+        },
+        {
+            "label": "Insert",
+            "description": "",
+            "icon": "find-replace",
+            "command": "insertNewCode",
+            "arguments": ["ui/components/tableItem.ts", "<td className=\"col-date-time\">", "<div className=\"WOW\"></div>", "before"]
+        },
+        {
+            "label": "Replace",
+            "description": "",
+            "icon": "find-replace",
+            "command": "insertNewCode",
+            "arguments": [
+                "package.json",
+                "\"webpack\": \"node --max-old-space-size=4096",
+                "\"webpack\": \"node --max-old-space-size=8192",
+                "replace"
+            ]
+        },
+        {
+            "label": "Snippet ➜ console.log(*!!!* ➜)",
+            "description": "",
+            "icon": "code",
+            "command": "runCommand",
+            "arguments": [
+                "editor.action.insertSnippet",
+                {
+                    "snippet": "console.log('***** !!! ***** ${1| ,this.props,this.state,props|} ----->', $1);"
+                }
+            ]
+        }
+    ]
+}

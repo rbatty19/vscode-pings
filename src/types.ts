@@ -5,6 +5,17 @@ export interface IStore {
     globalStorageFilePath: string;
 }
 
+export enum commandsEnum {
+    openFile = 'openFile',
+    openFolder = 'openFolder',
+    run = 'run',
+    runCommand = 'runCommand',
+    insertNewCode = 'insertNewCode'
+}
+
+const commandsTypes = [...Object.values(commandsEnum)] as const;
+export type commandType = typeof commandsTypes[number];
+
 export type TCommand = (ICommand | ICommandWithSequence);
 
 export interface IItem extends vscode.TreeItem {
@@ -21,9 +32,9 @@ export interface ICommand {
     id: string;
     label: string;
     description?: string;
-    icon?: string;
+    icon?: 'file' | 'folder' | string;
     iconColor?: string;
-    command?: string;
+    command?: commandType | string;
     commands?: TCommand[];
     fake_resoure_icon_ref?: string;
     arguments?: Array<any>;
@@ -40,7 +51,7 @@ export interface ICommandWithSequence {
     fake_resoure_icon_ref?: string;
     commands: TCommand[];
     sequence?: Array<ICommand>;
-    command?: string;
+    command?: commandType | string;
     arguments?: Array<any>;
     path?: Array<any>;
     options?: any;
