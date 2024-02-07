@@ -50,7 +50,7 @@ export class TreeItem extends vscode.TreeItem {
         // const data2 = JSON.parse(fs.readFileSync(data1.path, 'utf8'));
 
         if (color) {
-            const existingColorCustomizations = getConfig().inspect('workbench.colorCustomizations')?.workspaceValue || getConfig().inspect('workbench.colorCustomizations')?.globalValue || {};
+            const existingColorCustomizations = getConfig().inspect('workbench.colorCustomizations')?.globalValue || {};
 
             colorId = `pings.custom_color-${color.split('#').pop()}`;
             await getConfig().update('workbench.colorCustomizations', {
