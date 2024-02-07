@@ -9,3 +9,8 @@ The extension adds a panel for accessing frequently used commands, files, direct
 its required for files and/or folders
 
 ![alt text](preview/example_1.png)
+
+example:
+
+![alt text](preview/image-2.png)
+![alt text](preview/image-3.png)
