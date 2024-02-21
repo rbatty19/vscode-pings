@@ -4,17 +4,13 @@ import { errors } from './extension';
 import { ICommand, commandsEnum } from './types';
 import { homedir } from 'os';
 
-// const { execSync } = require('child_process');
-import { exec } from 'child_process';
+import { spawn, exec } from 'child_process';
 
-// Run program or script
 export function runProgram([program]: any) {
-    exec(program, { shell: 'true' }, (err: any, data: any) => {
-        console.log({ err });
-        console.log(data.toString());
+    exec(program, (error, stdout, stderr) => {
+        console.log(error);
     });
 }
-
 
 // Open file
 export function openFile(args: any) {
@@ -57,6 +53,11 @@ export function openFolder(payload: any, newWindow = false) {
     console.log('args: ', JSON.stringify(payload));
 
     let path: string = payload?.command?.arguments ?? '';
+
+    if (!path) {
+        vscode.window.showWarningMessage(`Path is missing`);
+        return;
+    }
 
     if (typeof path === 'string' && path.startsWith('~/'))
         path = path.replace('~', homedir());

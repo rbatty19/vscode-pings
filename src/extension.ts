@@ -1,6 +1,5 @@
 import * as demoSettings from '../resources/demosettings.json';
 import * as vscode from 'vscode';
-import * as JSONC from 'jsonc-parser';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as shortUUID from 'short-uuid';
@@ -10,6 +9,7 @@ import { PingsPanelProvider } from './PingsPanelProvider';
 import { TreeItem } from './TreeItem';
 import { insertNewCode, openFile, openFolder, runCommand, runProgram, runSequence } from './commands';
 import { Errors } from './Errors';
+import { buildNodeChainById, getCommandsFromFile } from './util/extension';
 
 // initial store.
 const store: IStore = {
@@ -69,37 +69,6 @@ const getIcon = (item: any, color?: string) => {
     }
 };
 
-// Get command from item of settings
-const getCommand = (item: ICommandWithSequence) => {
-    // if (item.sequence) {
-    //     return getSequence(item);
-    // }
-
-    // const argsByCommand: Record<string, unknown> = {
-    //     openFolder: item?.path,
-    //     openFile: [item?.path],
-    // };
-
-    // const iconData = item.icon || item.iconColor ? { id: item.icon, color: item.iconColor } : {};
-
-    // return new TreeItem(
-    //     item.label,
-    //     // scheme === 'folder' ? [] : undefined,
-    //     undefined,
-    //     {
-    //         iconData,
-    //         description: item.description,
-    //         fsPath: item?.path,
-    //         command: {
-    //             command: `${PLUGIN_NAME}.${item.command}`,
-    //             arguments: argsByCommand[`${item!.command}`] ?? [item.arguments],
-    //         },
-    //         contextValue: item.command,
-    //         id: item?.id ?? shortUUID.generate()
-    //     }
-    // );
-};
-
 // Get Sequence from item of settings
 const getSequence = (item: ICommandWithSequence) => {
     return {
@@ -124,29 +93,6 @@ const getCommandsFromWorkspaceConf = (): TCommand[] => vscode.workspace.getConfi
 const getConfFilePath = (): string => vscode.workspace.getConfiguration(PLUGIN_NAME).get('configPath') || '';
 const getWorkspaceConfFilePath = (): string => vscode.workspace.getConfiguration(PLUGIN_NAME).get('configPathForWorkspace') || '';
 
-/**
- * Get commands from file.
- * @param file full path with filename.
- */
-const getCommandsFromFile = (file: string): TCommand[] => {
-    try {
-        if (file && fs.existsSync(file)) {
-
-            const json = file.endsWith('.jsonc')
-                ? JSONC.parse(fs.readFileSync(file, 'utf8'))
-                : JSON.parse(fs.readFileSync(file, 'utf8'));
-
-            if (Array.isArray(json))
-                return json;
-
-            return json[`${PLUGIN_NAME}.commands`];
-        }
-    } catch {
-        console.error(`${getCommandsFromFile.name}: Error`);
-    }
-
-    return [];
-};
 
 export const writeNewCommandInGlobalStore = async ({ data, commandsStore }: any) => {
 
@@ -215,7 +161,7 @@ async function itemRender(item: any) {
     const command = item?.command ? {
         command: {
             command: `${PLUGIN_NAME}.${item.command}`,
-            arguments: argsByCommand[`${item!.command}`] ?? [item.arguments],
+            arguments: argsByCommand[`${item!.command}`] ?? (item.arguments ? [item.arguments] : undefined),
         },
     } : {};
 
@@ -235,28 +181,9 @@ async function itemRender(item: any) {
 
 }
 
-function buildNodeChainById(id: string) {
-    const commandsFromStore = getCommandsFromFile(store.globalStorageFilePath);
-    let nodeChain: string[] = [];
-    let globalItem: any;
-    const searchIdItem = (item: any, index: number, indexes: string[] = []) => {
-        indexes = [...indexes, `[${index}]`];
-        if (item?.id === id) {
-            nodeChain = indexes;
-            globalItem = item;
-            return true;
-        }
-        if (item.commands)
-            item.commands.some((item: any, index: any) =>
-                searchIdItem(item, index, [...indexes, `['commands']`])
-            );
 
-    };
-    commandsFromStore.some((item, index) => searchIdItem(item, index));
-    return { nodeChain, item: globalItem };
-}
 
-async function checkGlobalStoreFile(storeUri: vscode.Uri) {
+export async function checkGlobalStoreFile(storeUri: vscode.Uri) {
     try {
         await vscode.workspace.fs.readFile(storeUri);
     } catch {
@@ -325,14 +252,14 @@ export async function activate(context: vscode.ExtensionContext) {
 
     vscode.commands.registerCommand(`${PLUGIN_NAME}.MoveItemToGroup`, async (item) => {
 
-        const { nodeChain: currentItemChain, item: itemToMove } = buildNodeChainById(item?.id);
+        const commandsFromStore = getCommandsFromFile(store.globalStorageFilePath);
+
+        const { nodeChain: currentItemChain, item: itemToMove } = buildNodeChainById(item?.id, commandsFromStore);
 
         if (!currentItemChain?.length) {
             vscode.window.showWarningMessage(`This Item doesn't have "id" or chain`);
             return;
         }
-
-        const commandsFromStore = getCommandsFromFile(store.globalStorageFilePath);
 
         const roots: unknown[] = [];
 
@@ -359,13 +286,12 @@ export async function activate(context: vscode.ExtensionContext) {
                     );
             }
         }
+
         commandsFromStore.forEach((item: any, index) => rootAnalyzer(item, [], {
             chain: [`[${index}]`, `['commands']`],
             index,
             indexes: [index]
         }));
-
-        // vscode.window.showInformationMessage(`currenItemChain ${JSON.stringify(currentItemChain, null, 2)}`);
 
         const baseRootItem = currentItemChain.length >= 2 ? [{
             label: 'base',
@@ -378,7 +304,7 @@ export async function activate(context: vscode.ExtensionContext) {
         const pickedCommand = await vscode.window.showQuickPick([...baseRootItem, ...roots.map(({ chain, size, ...item }: any, key) => ({
             label: item.path,
             key,
-            description: `${item.description}`,
+            description: `${item.description ?? ''}`,
             chain,
             size
         }))], {
@@ -390,30 +316,17 @@ export async function activate(context: vscode.ExtensionContext) {
         const tempData = commandsFromStore;
         const tempStoreName = Object.keys({ tempData }).pop();
 
-        // vscode.window.showWarningMessage(`pickedCommand?.chain.length (b): ${pickedCommand?.chain.length}`);
-
         const isPickedBase = pickedCommand?.chain.length < 2;
-
-        // vscode.window.showWarningMessage(`pickedCommand.chain: ${pickedCommand?.chain.join('')}`);
 
         if (pickedCommand?.chain.join('').endsWith("['commands']")) pickedCommand?.chain.pop();
 
-        // vscode.window.showWarningMessage(`tempData${pickedCommand?.chain.join('')}`);
-
         const result = eval(`${tempStoreName}${pickedCommand?.chain.join('')}`);
-
-        // vscode.window.showWarningMessage(`result ${JSON.stringify(result, null, 2)}`);
 
         if (!isPickedBase && !result?.['commands']) Object.assign(result, { commands: [] });
 
-        // vscode.window.showWarningMessage(`result?.['commands'].length ${JSON.stringify(result?.['commands'].length, null, 2)}`);
-        // vscode.window.showWarningMessage(`result?.length ${JSON.stringify(result?.length, null, 2)}`);
-        // vscode.window.showWarningMessage(`result ${JSON.stringify(result, null, 2)}`);
-
-        if (result?.['commands']) {
-            // vscode.window.showWarningMessage(`is here`);
+        if (result?.['commands'])
             result?.['commands'].splice(result?.['commands'].length, 0, itemToMove);
-        } else
+        else
             result.splice(result?.length, 0, itemToMove);
 
         const [last] = JSON.parse(currentItemChain.pop()!);

@@ -2,34 +2,18 @@
     "name": "pings",
     "displayName": "Pings",
     "description": "Use the extension to create a panel with your favorite commands, folders, files, URLs.",
-    "version": "1.0.18",
+    "version": "1.0.19",
     "publisher": "rbatty19",
-    "engines": {
-        "vscode": "^1.53.0",
-        "node": "20"
-    },
-    "categories": [
-        "Other"
-    ],
-    "keywords": [
-        "bookmarks",
-        "favorites",
-        "groups",
-        "pings",
-        "remember",
-        "pin",
-        "pinned",
-        "folders",
-        "files",
-        "tools",
-        "favorite files"
-    ],
-    "activationEvents": [],
     "icon": "resources/pings.png",
     "homepage": "https://github.com/rbatty19/vscode-pings",
     "repository": {
         "type": "git",
         "url": "https://github.com/rbatty19/vscode-pings.git"
+    },
+    "main": "./out/extension.js",
+    "engines": {
+        "vscode": "^1.53.0",
+        "node": "20"
     },
     "scripts": {
         "vscode:prepublish": "npm run compile",
@@ -42,7 +26,6 @@
         "vsce:publish": "vsce publish",
         "vsce:login": "vsce login"
     },
-    "main": "./out/extension.js",
     "contributes": {
         "configuration": {
             "type": "object",
@@ -76,6 +59,20 @@
             }
         },
         "menus": {
+            "commandPalette": [
+                {
+                    "command": "pings.AddFileToGlobalStore",
+                    "when": "false"
+                },
+                {
+                    "command": "pings.MoveItemToGroup",
+                    "when": "false"
+                },
+                {
+                    "command": "pings.ShowInfo",
+                    "when": "false"
+                }
+            ],
             "explorer/context": [
                 {
                     "command": "pings.AddFileToGlobalStore",
@@ -106,7 +103,7 @@
                 },
                 {
                     "command": "pings.ShowInfo",
-                    "when": "view =~ /pings/ && 0",
+                    "when": "view =~ /pings/", 
                     "group": "1-filters@1"
                 }
             ],
@@ -226,5 +223,22 @@
     "dependencies": {
         "jsonc-parser": "^3.2.0",
         "short-uuid": "^4.2.2"
-    }
+    },
+    "categories": [
+        "Other"
+    ],
+    "keywords": [
+        "bookmarks",
+        "favorites",
+        "groups",
+        "pings",
+        "remember",
+        "pin",
+        "pinned",
+        "folders",
+        "files",
+        "tools",
+        "favorite files"
+    ],
+    "activationEvents": []
 }

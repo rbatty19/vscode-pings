@@ -32,9 +32,9 @@ export interface ICommand {
     id: string;
     label: string;
     description?: string;
-    icon?: 'file' | 'folder' | string;
+    icon?: 'file' & 'folder' & string;
     iconColor?: string;
-    command?: commandType | string;
+    command?: commandType & string;
     commands?: TCommand[];
     fake_resoure_icon_ref?: string;
     arguments?: Array<any>;
@@ -51,7 +51,7 @@ export interface ICommandWithSequence {
     fake_resoure_icon_ref?: string;
     commands: TCommand[];
     sequence?: Array<ICommand>;
-    command?: commandType | string;
+    command?: commandType & string;
     arguments?: Array<any>;
     path?: Array<any>;
     options?: any;
